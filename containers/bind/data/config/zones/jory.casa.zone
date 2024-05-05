@@ -1,0 +1,36 @@
+; SOA Records
+$TTL 3600
+$ORIGIN jory.casa.
+@ 3600 IN SOA jory.casa. nahida.jory.casa. (
+    0000000001         ; serial number
+    7200               ; refresh period
+    3600               ; retry period
+    1209600            ; expire time
+    3600               ; minimum ttl
+)
+
+; NS Records
+@                          IN  NS     nahida.jory.casa.
+
+; LAN
+unifi                      IN  A      192.168.1.1
+
+; Servers
+ayaka                      IN  A      10.69.1.21
+eula                       IN  A      10.69.1.22
+ganyu                      IN  A      10.69.1.23
+hutao                      IN  A      10.69.1.24
+navia                      IN  A      10.69.1.25
+yelan                      IN  A      10.69.1.26
+nahida                     IN  A      10.69.1.99
+smurf-raid                 IN  A      10.69.1.100
+mika                       IN  A      10.69.1.101
+acheron                    IN  A      10.69.1.121
+himeko                     IN  A      10.69.1.122
+jingliu                    IN  A      10.69.1.123
+kafka                      IN  A      10.69.1.124
+
+; CNAME records
+minio                      IN  CNAME  smurf-raid.jory.casa.
+nas                        IN  CNAME  smurf-raid.jory.casa.
+s3                         IN  CNAME  smurf-raid.jory.casa.

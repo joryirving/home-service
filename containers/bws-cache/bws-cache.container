@@ -1,0 +1,17 @@
+[Unit]
+Description=bws-cache
+
+[Container]
+ContainerName=bws-cache
+Image=ghcr.io/ripplefcl/bws-cache:v1.1.0
+Environment=TZ=America/Edmonton
+# sudo podman secret create org_id ./containers/bws-cache/bws-cache.secret
+Secret=org_id,type=env,target=ORG_ID
+Network=host
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target default.target
