@@ -20,6 +20,7 @@ $ORIGIN in-addr.arpa.
 10.1.168.192               IN  PTR    tessmart.jory.casa.
 
 ; Servers
+2.1.69.10                  IN  PTR    nginx.jory.casa.
 21.1.69.10                 IN  PTR    ayaka.jory.casa.
 22.1.69.10                 IN  PTR    eula.jory.casa.
 23.1.69.10                 IN  PTR    ganyu.jory.casa.

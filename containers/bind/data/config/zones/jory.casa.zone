@@ -16,6 +16,7 @@ $ORIGIN jory.casa.
 unifi                      IN  A      192.168.1.1
 
 ; Servers
+nginx                      IN  A      10.69.1.2
 ayaka                      IN  A      10.69.1.21
 eula                       IN  A      10.69.1.22
 ganyu                      IN  A      10.69.1.23
