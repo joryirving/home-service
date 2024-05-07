@@ -1,0 +1,15 @@
+[Unit]
+Description=smartctl-exporter
+
+[Container]
+ContainerName=smartctl-exporter
+Image=ghcr.io/joryirving/smartctl_exporter:0.12.0
+Network=host
+User=root
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target default.target
