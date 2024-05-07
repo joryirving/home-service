@@ -65,3 +65,10 @@ tasks:
     requires:
       vars: ["container"]
     internal: true
+
+  bootstrap-nut:
+    desc: Copy NUT config files
+    cmds:
+      - sudo rsync -rv --delete {{.ROOT_DIR}}/ups/ /etc/ups/
+      - sudo sed -i "s/pass_placeholder/$(cat ./ups/password.secret | sed 's/\//\\\//g')/" /etc/ups/* | bash
+      - sudo systemctl enable --now nut.target nut-monitor nut-server

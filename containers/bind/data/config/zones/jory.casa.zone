@@ -24,7 +24,7 @@ hutao                      IN  A      10.69.1.24
 navia                      IN  A      10.69.1.25
 yelan                      IN  A      10.69.1.26
 nahida                     IN  A      10.69.1.99
-smurf-raid                 IN  A      10.69.1.100
+nas                        IN  A      10.69.1.100
 mika                       IN  A      10.69.1.101
 acheron                    IN  A      10.69.1.121
 himeko                     IN  A      10.69.1.122
@@ -32,6 +32,5 @@ jingliu                    IN  A      10.69.1.123
 kafka                      IN  A      10.69.1.124
 
 ; CNAME records
-minio                      IN  CNAME  smurf-raid.jory.casa.
-nas                        IN  CNAME  smurf-raid.jory.casa.
-s3                         IN  CNAME  smurf-raid.jory.casa.
+minio                      IN  CNAME  nas.jory.casa.
+s3                         IN  CNAME  nas.jory.casa.

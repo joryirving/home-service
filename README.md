@@ -1,10 +1,10 @@
 # home-dns
 
-My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and managed by podman and systemd
+My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and managed by podman and systemd.
 
-## Fedora IoT
+## System configuration
 
-1. Install Fedora IoT on SD card, using [arm-image-installer](https://pagure.io/arm-image-installer/releases) ...
+1. Install Fedora IoT on Storage(SD Card/SSD) using [arm-image-installer](https://pagure.io/arm-image-installer/releases)
 
     ```sh 
     sudo apt install selinux-utils -y
@@ -14,11 +14,11 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
     tar -xvf arm-image-installer-arm-image-installer-4.1.tar.gz
     wget https://download.fedoraproject.org/pub/alt/iot/40/IoT/aarch64/images/Fedora-IoT-raw-40-20240422.3.aarch64.raw.xz
     lsblk
-    ## Note the SD card you're using
+    ## Note the device you're using
     sudo ./arm-image-installer-arm-image-installer-4.1/arm-image-installer --image=./Fedora-IoT-raw-40-20240422.3.aarch64.raw.xz --target=rpi4 --media=/dev/sdb --addkey=./authorized_keys --resizefs --selinux=OFF -y
     ```
 
-2. Install base system deps and reboot ...
+2. Install required system deps and reboot
 
     ```sh
     sudo hostnamectl set-hostname --static nahida
@@ -26,7 +26,17 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
     sudo systemctl reboot
     ```
 
-3. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo ...
+3. Optional: Make a new user, add them to sudo, and enable `fish`
+
+    ```sh
+    useradd <username>
+    sudo passwd <username>
+    usermod -aG wheel <username>
+    sudo nano /etc/passwd
+    `change /bin/bash to /usr/bin/fish`
+    ```
+
+4. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo
 
     ```sh
     export GITHUB_USER="joryirving"
@@ -37,37 +47,11 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
     git clone git@github.com:$GITHUB_USER/home-dns.git .
     ```
 
-4. Install additional system deps ...
+5. Install additional system deps and reboot
 
     ```sh
     cd /var/opt/home-dns
     go-task deps
-    ```
-
-5. Set `selinux` to `permissive` ...
-
-    ```sh
-    sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
-    ```
-
-6. Disable `firewalld` ...
-
-    ```sh
-    sudo systemctl mask firewalld.service
-    ```
-
-7. Disable `systemd-resolved`, update `/etc/resolv.conf` and reboot ...
-
-    ```sh
-    export DOMAIN="jory.casa"
-    sudo systemctl mask systemd-resolved.service
-    sudo rm -rf /etc/resolv.conf
-    sudo --preserve-env bash -c 'cat << EOF > /etc/resolv.conf
-    nameserver 1.1.1.1
-    domain $DOMAIN
-    search $DOMAIN
-    EOF'
-    sudo chattr +i /etc/resolv.conf
     sudo systemctl reboot
     ```
 
@@ -77,24 +61,20 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 
 > [!IMPORTANT]
 > **Do not** modify the key contents after it's creation, instead create a new key using `tsig-keygen`.
-
-1. Create the base rndc key ...
+1. Create the base rndc key
 
     ```sh
     tsig-keygen -a hmac-sha256 rndc-key > ./containers/bind/data/config/rndc.key
     ```
 
-2. Create additional rndc keys for external-dns ...
+2. Create additional rndc keys for external-dns
 
     ```sh
     tsig-keygen -a hmac-sha256 kubernetes-main-key > ./containers/bind/data/config/kubernetes-main.key
+    tsig-keygen -a hmac-sha256 kubernetes-pi-key > ./containers/bind/data/config/kubernetes-pi.key
     ```
 
-3. Edit `./containers/bind/data/config/named.conf` with your included keys and zones.
-
-4. Update `./containers/bind/data/config/zones` with your DNS configuration.
-
-5. Attempt to run bind
+3. Update `./containers/bind/data/config` with your configuration and then start it
 
     ```sh
     go-task start-bind
@@ -104,12 +84,7 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 
 > [!IMPORTANT]
 > Blocky can take awhile to start depending on how many blocklists you have configured
-
-1. Edit `./etc/containers/systemd/blocky/config/config.yaml` with your bind IP address for `.clientLookup.upstream`
-
-2. Change any other configuration you want (e.g. blocklists)
-
-3. Attempt to run blocky
+1. Update `./containers/blocky/data/config/config.yaml` with your configuration and then start it
 
     ```sh
     go-task start-blocky
@@ -117,31 +92,98 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 
 ### dnsdist
 
-1. Edit `./etc/containers/systemd/dnsdist/config/dnsdist.conf` and update the IP addresses for bind and blocky.
+> [!IMPORTANT]
+> Prevent `systemd-resolved` from listening on port `53`
+> ```sh
+> sudo bash -c 'cat << EOF > /etc/systemd/resolved.conf.d/stub-listener.conf
+> [Resolve]
+> DNSStubListener=no'
+> sudo systemctl restart systemd-resolved
+> ```
 
-2. Change the actions to suit your networks.
-
-3. Attempt to run dnsdist
+1. Update `./containers/dnsdist/data/config/dnsdist.conf` with your configuration and then start it
 
     ```sh
     go-task start-dnsdist
     ```
 
-## Testing
+### bws-cache
+
+1. Add your `ORG_ID` to `./containers/bws-cache/bws-cache.secret`
+
+2. Create the podman secret
+
+    ```sh
+    sudo podman secret create org_id ./containers/bws-cache/bws-cache.secret
+    ```
+
+3. Start `bws-cache`
+    ```sh
+    go-test start-bws-cache
+    ```
+
+### podman-exporter
+
+1. Enable the `podman.socket` service
+
+    ```sh
+    sudo systemctl enable --now podman.socket
+    ```
+
+2. Start `podman-exporter`
+
+    ```sh
+    go-task start-podman-exporter
+    ```
+
+### node-exporter
+
+1. Start `node-exporter`
+
+    ```sh
+    go-task start-node-exporter
+    ```
+
+## Testing DNS
 
 ```sh
-dig @10.69.1.99 -p 53 google.com             # dnsdist external query
-dig @10.69.1.99 -p 53 smurf-raid.jory.casa   # dnsdist internal query
-dig @10.69.1.99 -p 5301 google.com           # blocky external query
-dig @10.69.1.99 -p 5301 smurf-raid.jory.casa # blocky internal query
-dig @10.69.1.99 -p 5300 google.com           # bind external query
-dig @10.69.1.99 -p 5300 smurf-raid.jory.casa # bind internal query
+dig +short@10.69.1.99 -p 53 google.com             # dnsdist external query
+dig +short@10.69.1.99 -p 53 smurf-raid.jory.casa   # dnsdist internal query
+dig +short@10.69.1.99 -p 5300 google.com           # bind external query
+dig +short@10.69.1.99 -p 5300 smurf-raid.jory.casa # bind internal query
+dig +short@10.69.1.99 -p 5301 google.com           # blocky external query
+dig +short@10.69.1.99 -p 5301 smurf-raid.jory.casa # blocky internal query
 ```
 
 ## Additional Apps
 
 ### NUT
 
+1. Install `nut` package and reboot
+
     ```sh
     sudo rpm-ostree install --idempotent --assumeyes nut
+    sudo systemctl reboot
     ```
+
+2. Create password in `./ups/password.secret`
+
+3. Enable `nut` services
+
+    ```sh
+    go-task boostrap-nut
+    ```
+
+## Optional configuration
+
+### Tune selinux
+
+```sh
+sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+```
+
+### Disable firewalld
+
+```sh
+sudo systemctl mask firewalld.service
+```
