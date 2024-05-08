@@ -17,6 +17,7 @@ $ORIGIN in-addr.arpa.
 
 ; LAN
 1.1.168.192                IN  PTR    unifi.jory.casa.
+2.1.168.192		           IN  PTR    nahida.jory.casa.
 10.1.168.192               IN  PTR    tessmart.jory.casa.
 
 ; Servers
@@ -27,7 +28,6 @@ $ORIGIN in-addr.arpa.
 24.1.69.10                 IN  PTR    hutao.jory.casa.
 25.1.69.10                 IN  PTR    navia.jory.casa.
 26.1.69.10                 IN  PTR    yelan.jory.casa.
-99.1.69.10                 IN  PTR    nahida.jory.casa.
 100.1.69.10                IN  PTR    nas.jory.casa.
 101.1.69.10                IN  PTR    mika.jory.casa.
 121.1.69.10                IN  PTR    acheron.jory.casa.

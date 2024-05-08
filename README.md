@@ -147,12 +147,12 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 ## Testing DNS
 
 ```sh
-dig +short@10.69.1.99 -p 53 google.com             # dnsdist external query
-dig +short@10.69.1.99 -p 53 smurf-raid.jory.casa   # dnsdist internal query
-dig +short@10.69.1.99 -p 5300 google.com           # bind external query
-dig +short@10.69.1.99 -p 5300 smurf-raid.jory.casa # bind internal query
-dig +short@10.69.1.99 -p 5301 google.com           # blocky external query
-dig +short@10.69.1.99 -p 5301 smurf-raid.jory.casa # blocky internal query
+dig +short @192.168.1.2 -p 53 google.com      # dnsdist external query
+dig +short @192.168.1.2 -p 53 nas.jory.casa   # dnsdist internal query
+dig +short @192.168.1.2 -p 5300 google.com    # bind external query
+dig +short @192.168.1.2 -p 5300 nas.jory.casa # bind internal query
+dig +short @192.168.1.2 -p 5301 google.com    # blocky external query
+dig +short @192.168.1.2 -p 5301 nas.jory.casa # blocky internal query
 ```
 
 ## Additional Apps

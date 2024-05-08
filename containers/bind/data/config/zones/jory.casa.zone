@@ -14,6 +14,8 @@ $ORIGIN jory.casa.
 
 ; LAN
 unifi                      IN  A      192.168.1.1
+nahida			           IN  A      192.168.1.2
+tessmart		           IN  A      192.168.1.10
 
 ; Servers
 nginx                      IN  A      10.69.1.2
@@ -23,7 +25,6 @@ ganyu                      IN  A      10.69.1.23
 hutao                      IN  A      10.69.1.24
 navia                      IN  A      10.69.1.25
 yelan                      IN  A      10.69.1.26
-nahida                     IN  A      10.69.1.99
 nas                        IN  A      10.69.1.100
 mika                       IN  A      10.69.1.101
 acheron                    IN  A      10.69.1.121
