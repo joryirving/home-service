@@ -1,6 +1,15 @@
-# home-dns
+# home-service
 
-My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and managed by podman and systemd.
+My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) with [Fedora IoT](https://fedoraproject.org/iot/). These [podman](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) services are supporting my home infrastructure including, DNS and Kubernetes clusters.
+
+## Core Components
+
+- [bind9](https://www.isc.org/bind/): Authoritative DNS server for my domains.
+- [blocky](https://github.com/0xERR0R/blocky): Fast and lightweight ad-blocker.
+- [dnsdist](https://dnsdist.org/): A DNS load balancer.
+- [node-exporter](https://github.com/prometheus/node_exporter): Exporter for machine metrics.
+- [bws-cache](https://github.com/rippleFCL/bws-cache): Access Bitwarden secret manager.
+- [podman-exporter](https://github.com/containers/prometheus-podman-exporter): Prometheus exporter for podman.
 
 ## System configuration
 
@@ -17,6 +26,8 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
     ## Note the device you're using
     sudo ./arm-image-installer-arm-image-installer-4.1/arm-image-installer --image=./Fedora-IoT-raw-40-20240422.3.aarch64.raw.xz --target=rpi4 --media=/dev/sdb --addkey=./authorized_keys --resizefs --selinux=OFF -y
     ```
+> [!IMPORTANT]
+> A non-root user must be created (if not already) and used.
 
 2. Install required system deps and reboot
 
@@ -41,17 +52,17 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
     ```sh
     export GITHUB_USER="joryirving"
     curl https://github.com/$GITHUB_USER.keys > ~/.ssh/authorized_keys
-    sudo mkdir -p /var/opt/home-dns
-    sudo chown -R $(logname):$(logname) /var/opt/home-dns
-    cd /var/opt/home-dns
-    git clone git@github.com:$GITHUB_USER/home-dns.git .
+    sudo mkdir -p /var/opt/home-service
+    sudo chown -R $(logname):$(logname) /var/opt/home-service
+    cd /var/opt/home-service
+    git clone git@github.com:$GITHUB_USER/home-service.git .
     ```
 
 5. Install additional system deps and reboot
 
     ```sh
     cd /var/opt/home-dns
-    go-task deps
+    task deps
     sudo systemctl reboot
     ```
 
@@ -77,7 +88,7 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 3. Update `./containers/bind/data/config` with your configuration and then start it
 
     ```sh
-    go-task start-bind
+    task start-bind
     ```
 
 ### blocky
@@ -87,7 +98,7 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 1. Update `./containers/blocky/data/config/config.yaml` with your configuration and then start it
 
     ```sh
-    go-task start-blocky
+    task start-blocky
     ```
 
 ### dnsdist
@@ -104,7 +115,7 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 1. Update `./containers/dnsdist/data/config/dnsdist.conf` with your configuration and then start it
 
     ```sh
-    go-task start-dnsdist
+    task start-dnsdist
     ```
 
 ### bws-cache
@@ -119,7 +130,15 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 
 3. Start `bws-cache`
     ```sh
-    go-test start-bws-cache
+    test start-bws-cache
+    ```
+
+### node-exporter
+
+1. Start `node-exporter`
+
+    ```sh
+    task start-node-exporter
     ```
 
 ### podman-exporter
@@ -133,15 +152,7 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 2. Start `podman-exporter`
 
     ```sh
-    go-task start-podman-exporter
-    ```
-
-### node-exporter
-
-1. Start `node-exporter`
-
-    ```sh
-    go-task start-node-exporter
+    task start-podman-exporter
     ```
 
 ## Testing DNS
@@ -171,7 +182,7 @@ echo "blocky internal query";  dig +short @192.168.1.2 -p 5301 nas.jory.casa | s
 3. Enable `nut` services
 
     ```sh
-    go-task boostrap-nut
+    task boostrap-nut
     ```
 
 ## Optional configuration
