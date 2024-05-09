@@ -147,12 +147,12 @@ My home DNS stack running on [Fedora IoT](https://fedoraproject.org/iot/) and ma
 ## Testing DNS
 
 ```sh
-dig +short @192.168.1.2 -p 53 google.com      # dnsdist external query
-dig +short @192.168.1.2 -p 53 nas.jory.casa   # dnsdist internal query
-dig +short @192.168.1.2 -p 5300 google.com    # bind external query
-dig +short @192.168.1.2 -p 5300 nas.jory.casa # bind internal query
-dig +short @192.168.1.2 -p 5301 google.com    # blocky external query
-dig +short @192.168.1.2 -p 5301 nas.jory.casa # blocky internal query
+echo "dnsdist external query"; dig +short @192.168.1.2 -p 53 google.com | sed 's/^/  /'
+echo "dnsdist internal query"; dig +short @192.168.1.2 -p 53 nas.jory.casa | sed 's/^/  /'
+echo "bind external query";    dig +short @192.168.1.2 -p 5300 google.com | sed 's/^/  /'
+echo "bind internal query";    dig +short @192.168.1.2 -p 5300 nas.jory.casa | sed 's/^/  /'
+echo "blocky external query";  dig +short @192.168.1.2 -p 5301 google.com | sed 's/^/  /'
+echo "blocky internal query";  dig +short @192.168.1.2 -p 5301 nas.jory.casa | sed 's/^/  /'
 ```
 
 ## Additional Apps
@@ -175,6 +175,17 @@ dig +short @192.168.1.2 -p 5301 nas.jory.casa # blocky internal query
     ```
 
 ## Optional configuration
+
+### Alias go-task
+
+> [!NOTE]
+> This is for only using the [fish shell](https://fishshell.com/)
+```sh
+function task --wraps=go-task --description 'go-task shorthand'
+    go-task $argv
+end
+funcsave task
+```
 
 ### Tune selinux
 
