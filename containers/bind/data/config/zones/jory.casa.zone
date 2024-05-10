@@ -36,12 +36,12 @@ amber                      IN  A      10.69.1.101
 celestia                   IN  A      10.69.1.121
 
 ; Containers
-bws-cache                  IN  A      192.168.1.124
 traefik                    IN  A      192.168.1.125
 gatus                      IN  A      192.168.1.126
 
 ; CNAME records
 blocky                     IN  CNAME  traefik.jory.casa.
+bws-cache                  IN  CNAME  traefik.jory.casa.
 status                     IN  CNAME  traefik.jory.casa.
 minio                      IN  CNAME  nas.jory.casa.
 s3                         IN  CNAME  nas.jory.casa.
