@@ -41,6 +41,7 @@ traefik                    IN  A      192.168.1.125
 gatus                      IN  A      192.168.1.126
 
 ; CNAME records
+blocky                     IN  CNAME  traefik.jory.casa.
 status                     IN  CNAME  traefik.jory.casa.
 minio                      IN  CNAME  nas.jory.casa.
 s3                         IN  CNAME  nas.jory.casa.
