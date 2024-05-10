@@ -30,11 +30,8 @@ yelan                      IN  A      10.69.1.26
 ubuntu-server              IN  A      10.69.1.98
 smurf-lab                  IN  A      10.69.1.99
 nas                        IN  A      10.69.1.100
-mika                       IN  A      10.69.1.101
-acheron                    IN  A      10.69.1.121
-himeko                     IN  A      10.69.1.122
-jingliu                    IN  A      10.69.1.123
-kafka                      IN  A      10.69.1.124
+amber                      IN  A      10.69.1.101
+celestia                   IN  A      10.69.1.121
 
 ; CNAME records
 minio                      IN  CNAME  nas.jory.casa.
