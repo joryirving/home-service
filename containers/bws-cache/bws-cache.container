@@ -3,7 +3,7 @@ Description=bws-cache
 
 [Container]
 ContainerName=bws-cache
-Image=ghcr.io/ripplefcl/bws-cache:v1.1.0
+Image=ghcr.io/ripplefcl/bws-cache:v1.1.0@sha256:bcee868971c14cf9180249059c386706b8ab2ad3f3749762006aa261f6490744
 Environment=TZ=America/Edmonton
 # sudo podman secret create org_id ./containers/bws-cache/bws-cache.secret
 Secret=org_id,type=env,target=ORG_ID

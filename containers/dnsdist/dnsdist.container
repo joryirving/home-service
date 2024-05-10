@@ -5,7 +5,7 @@ After=bind.service blocky.service
 
 [Container]
 ContainerName=dnsdist
-Image=docker.io/kometchtech/dnsdist:1.9.3
+Image=docker.io/kometchtech/dnsdist:1.9.3@sha256:c4a0c8b07b93f648cceeb52196e5c498d9401b030cb8a68e7840647e9bad278a
 Environment=TZ=America/Edmonton
 Volume=./dnsdist/config/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro
 Network=host
