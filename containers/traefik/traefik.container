@@ -9,7 +9,7 @@ Volume=./traefik/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
 Volume=./traefik/cache:/data
 Volume=/run/podman/podman.sock:/var/run/docker.sock:z
 Network=containernet
-IP=192.168.1.126
+IP=192.168.1.125
 AddCapability=NET_BIND_SERVICE
 SecurityLabelType=container_runtime_t
 

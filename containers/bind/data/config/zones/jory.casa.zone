@@ -36,11 +36,11 @@ amber                      IN  A      10.69.1.101
 celestia                   IN  A      10.69.1.121
 
 ; Containers
-traefik                    IN  A      192.168.1.126
-gatus                      IN  A      192.168.1.127
+bws-cache                  IN  A      192.168.1.124
+traefik                    IN  A      192.168.1.125
+gatus                      IN  A      192.168.1.126
 
 ; CNAME records
-gatus                      IN  CNAME  nahida.jory.casa.
-traefik                    IN  CNAME  nahida.jory.casa.
+status                     IN  CNAME  traefik.jory.casa.
 minio                      IN  CNAME  nas.jory.casa.
 s3                         IN  CNAME  nas.jory.casa.

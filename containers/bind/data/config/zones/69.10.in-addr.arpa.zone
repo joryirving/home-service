@@ -23,8 +23,8 @@ $ORIGIN in-addr.arpa.
 24.1.69.10                 IN  PTR    hutao.jory.casa.
 25.1.69.10                 IN  PTR    navia.jory.casa.
 26.1.69.10                 IN  PTR    yelan.jory.casa.
-98.1.69.10                 IN  PTR    ubuntu-server.jory.casa
-99.1.69.10                 IN  PTR    smurf-lab.jory.casa
+98.1.69.10                 IN  PTR    ubuntu-server.jory.casa.
+99.1.69.10                 IN  PTR    smurf-lab.jory.casa.
 100.1.69.10                IN  PTR    nas.jory.casa.
 101.1.69.10                IN  PTR    amber.jory.casa.
 121.1.69.10                IN  PTR    celestia.jory.casa.

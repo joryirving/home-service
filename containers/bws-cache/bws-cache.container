@@ -7,7 +7,10 @@ Image=ghcr.io/ripplefcl/bws-cache:v1.1.0@sha256:bcee868971c14cf9180249059c386706
 Environment=TZ=America/Edmonton
 # sudo podman secret create org_id ./containers/bws-cache/bws-cache.secret
 Secret=org_id,type=env,target=ORG_ID
-Network=host
+Network=containernet
+IP=192.168.1.124
+User=root
+AddCapability=NET_BIND_SERVICE
 
 [Service]
 Restart=always

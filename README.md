@@ -104,7 +104,8 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
     ```sh
     sudo systemctl disable --now NetworkManager
-    sudo systemctl enable --now systemd-networkd
+    sudo systemctl enable systemd-networkd
+    sudo systemctl start systemd-networkd
     ```
 
 ### Container configuration
