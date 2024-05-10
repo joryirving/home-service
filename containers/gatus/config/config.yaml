@@ -1,0 +1,117 @@
+web:
+  port: 80
+storage:
+  type: memory
+metrics: true
+ui:
+  title: Home Status | Gatus
+  header: Home Status
+alerting:
+  discord:
+    webhook-url: ${DISCORD_WEBHOOK_URL}
+    default-alert:
+      description: health-check failed
+      send-on-resolved: true
+      failure-threshold: 5
+      success-threshold: 2
+connectivity:
+  checker:
+    target: 1.1.1.1:53
+    interval: 1m
+endpoints:
+  #
+  # DNS group
+  #
+  - name: dnsdist-external
+    group: DNS
+    url: 192.168.1.121:53
+    dns:
+      query-name: google.com
+      query-type: A
+    conditions: ["[DNS_RCODE] == NOERROR"]
+  - name: dnsdist-internal
+    group: DNS
+    url: 192.168.1.121:53
+    dns:
+      query-name: nahida.jory.casa
+      query-type: A
+    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+  - name: bind-internal
+    group: DNS
+    url: 192.168.1.123:53
+    dns:
+      query-name: nahida.jory.casa
+      query-type: A
+    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+  - name: blocky-external
+    group: DNS
+    url: 192.168.1.122:53
+    dns:
+      query-name: google.com
+      query-type: A
+    conditions: ["[DNS_RCODE] == NOERROR"]
+  - name: blocky-internal
+    group: DNS
+    url: 192.168.1.122:53
+    dns:
+      query-name: nahida.jory.casa
+      query-type: A
+    conditions: ["[DNS_RCODE] == NOERROR"]
+  #
+  # Devices group
+  #
+  - name: Unifi Dream Machine (ICMP)
+    group: Devices
+    url: icmp://192.168.1.1
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 0 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.21
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 1 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.22
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 2 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.23
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 3 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.24
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 4 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.25
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 5 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.26
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Kubernetes Node 6 (ICMP)
+    group: Devices
+    url: icmp://10.69.1.121
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: TESmart KVM (ICMP)
+    group: Devices
+    url: icmp://192.168.1.10
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: NAS (ICMP)
+    group: Devices
+    url: icmp://10.69.1.100
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: RPi (ICMP)
+    group: Devices
+    url: icmp://10.69.1.101
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]

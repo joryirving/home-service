@@ -9,6 +9,8 @@ Image=docker.io/kometchtech/dnsdist:1.9.3@sha256:c4a0c8b07b93f648cceeb52196e5c49
 Environment=TZ=America/Edmonton
 Volume=./dnsdist/config/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro
 Network=host
+#Network=containernet
+#IP=192.168.1.121
 AddCapability=NET_BIND_SERVICE
 
 [Service]

@@ -4,14 +4,17 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
 ## Core Components
 
+- [bws-cache](https://github.com/rippleFCL/bws-cache):Integrate secrets into my infrastructure.
 - [bind9](https://www.isc.org/bind/): Authoritative DNS server for my domains.
 - [blocky](https://github.com/0xERR0R/blocky): Fast and lightweight ad-blocker.
 - [dnsdist](https://dnsdist.org/): A DNS load balancer.
 - [node-exporter](https://github.com/prometheus/node_exporter): Exporter for machine metrics.
-- [bws-cache](https://github.com/rippleFCL/bws-cache): Access Bitwarden secret manager.
 - [podman-exporter](https://github.com/containers/prometheus-podman-exporter): Prometheus exporter for podman.
+- [sops](https://github.com/getsops/sops): Manage secrets which are commited to Git.
 
-## System configuration
+## Setup
+
+### System configuration
 
 1. Install Fedora IoT on Storage(SD Card/SSD) using [arm-image-installer](https://pagure.io/arm-image-installer/releases)
 
@@ -32,22 +35,11 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 2. Install required system deps and reboot
 
     ```sh
-    sudo hostnamectl set-hostname --static nahida
-    sudo rpm-ostree install --idempotent --assumeyes git go-task fish
+    sudo rpm-ostree install --idempotent --assumeyes git go-task
     sudo systemctl reboot
     ```
 
-3. Optional: Make a new user, add them to sudo, and enable `fish`
-
-    ```sh
-    useradd <username>
-    sudo passwd <username>
-    usermod -aG wheel <username>
-    sudo nano /etc/passwd
-    `change /bin/bash to /usr/bin/fish`
-    ```
-
-4. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo
+3. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo
 
     ```sh
     export GITHUB_USER="joryirving"
@@ -58,31 +50,84 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     git clone git@github.com:$GITHUB_USER/home-service.git .
     ```
 
-5. Install additional system deps and reboot
+4. Install additional system deps and reboot
 
     ```sh
-    cd /var/opt/home-dns
     task deps
     sudo systemctl reboot
     ```
 
-## Apps
+### Network configuration
 
-### bind
+> [!NOTE]
+> _I am using [ipvlan](https://docs.docker.com/network/drivers/ipvlan) to expose most containers on their own IP addresses on the same network as this here device, the available addresses are mentioned in the `--ip-range` flag below. **Beware** of **IP addressing** and **interface names**._
+
+1. Create the podman `containernet` network
+
+    ```sh
+    sudo podman network create \
+        --driver=ipvlan \
+        --ipam-driver=host-local \
+        --subnet=192.168.1.0/24 \
+        --gateway=192.168.1.1 \
+        --ip-range=192.168.1.121-192.168.1.149 \
+        containernet
+    ```
+
+2. Setup the currently used interface with `systemd-networkd`
+
+    ```sh
+    sudo bash -c 'cat << EOF > /etc/systemd/network/end0.network
+    [Match]
+    Name = end0
+    [Network]
+    DHCP = yes
+    IPVLAN = containernet'
+    ```
+
+3. Setup `containernet` with `systemd-networkd`
+
+    ```sh
+    sudo bash -c 'cat << EOF > /etc/systemd/network/containernet.netdev
+    [NetDev]
+    Name = containernet
+    Kind = ipvlan'
+    sudo bash -c 'cat << EOF > /etc/systemd/network/containernet.network
+    [Match]
+    Name = containernet
+    [Network]
+    IPForward = yes
+    Address = 192.168.1.120/24'
+    ```
+
+5. Disable `networkmanager`, the enable and start `systemd-networkd`
+
+    ```sh
+    sudo systemctl disable --now NetworkManager
+    sudo systemctl enable --now systemd-networkd
+    ```
+
+### Container configuration
+
+#### bind
 
 > [!IMPORTANT]
-> **Do not** modify the key contents after it's creation, instead create a new key using `tsig-keygen`.
+> _**Do not** modify the key contents after it's creation, instead create a new key using `tsig-keygen`._
+
 1. Create the base rndc key
 
     ```sh
-    tsig-keygen -a hmac-sha256 rndc-key > ./containers/bind/data/config/rndc.key
+    tsig-keygen -a hmac-sha256 rndc-key > ./containers/bind/data/config/rndc.sops.key
+    sops --encrypt --in-place ./containers/bind/data/config/rndc.sops.key
     ```
 
 2. Create additional rndc keys for external-dns
 
     ```sh
-    tsig-keygen -a hmac-sha256 kubernetes-main-key > ./containers/bind/data/config/kubernetes-main.key
-    tsig-keygen -a hmac-sha256 kubernetes-pi-key > ./containers/bind/data/config/kubernetes-pi.key
+    tsig-keygen -a hmac-sha256 kubernetes-main-key > ./containers/bind/data/config/kubernetes-main.sops.key
+    tsig-keygen -a hmac-sha256 kubernetes-utility-key > ./containers/bind/data/config/kubernetes-utility.sops.key
+    sops --encrypt --in-place ./containers/bind/data/config/kubernetes-main.sops.key
+    sops --encrypt --in-place ./containers/bind/data/config/kubernetes-utility.sops.key
     ```
 
 3. Update `./containers/bind/data/config` with your configuration and then start it
@@ -91,20 +136,21 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     task start-bind
     ```
 
-### blocky
+#### blocky
 
 > [!IMPORTANT]
-> Blocky can take awhile to start depending on how many blocklists you have configured
+> _Blocky can take awhile to start depending on how many blocklists you have configured_
+
 1. Update `./containers/blocky/data/config/config.yaml` with your configuration and then start it
 
     ```sh
     task start-blocky
     ```
 
-### dnsdist
+#### dnsdist
 
 > [!IMPORTANT]
-> Prevent `systemd-resolved` from listening on port `53`
+> _Prevent `systemd-resolved` from listening on port `53`_
 > ```sh
 > sudo bash -c 'cat << EOF > /etc/systemd/resolved.conf.d/stub-listener.conf
 > [Resolve]
@@ -118,7 +164,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     task start-dnsdist
     ```
 
-### bws-cache
+#### bws-cache
 
 1. Add your `ORG_ID` to `./containers/bws-cache/bws-cache.secret`
 
@@ -130,10 +176,10 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
 3. Start `bws-cache`
     ```sh
-    test start-bws-cache
+    task start-bws-cache
     ```
 
-### node-exporter
+#### node-exporter
 
 1. Start `node-exporter`
 
@@ -141,7 +187,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     task start-node-exporter
     ```
 
-### podman-exporter
+#### podman-exporter
 
 1. Enable the `podman.socket` service
 
@@ -155,20 +201,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     task start-podman-exporter
     ```
 
-## Testing DNS
-
-```sh
-echo "dnsdist external query"; dig +short @192.168.1.2 -p 53 google.com | sed 's/^/  /'
-echo "dnsdist internal query"; dig +short @192.168.1.2 -p 53 nas.jory.casa | sed 's/^/  /'
-echo "bind external query";    dig +short @192.168.1.2 -p 5300 google.com | sed 's/^/  /'
-echo "bind internal query";    dig +short @192.168.1.2 -p 5300 nas.jory.casa | sed 's/^/  /'
-echo "blocky external query";  dig +short @192.168.1.2 -p 5301 google.com | sed 's/^/  /'
-echo "blocky internal query";  dig +short @192.168.1.2 -p 5301 nas.jory.casa | sed 's/^/  /'
-```
-
-## Additional Apps
-
-### NUT
+#### network-utility-tools
 
 1. Install `nut` package and reboot
 
@@ -185,12 +218,19 @@ echo "blocky internal query";  dig +short @192.168.1.2 -p 5301 nas.jory.casa | s
     task boostrap-nut
     ```
 
-## Optional configuration
+### Optional configuration
 
-### Alias go-task
+#### Switch to Fish
+
+```sh
+chsh -s /usr/bin/fish
+```
+
+#### Alias go-task
 
 > [!NOTE]
-> This is for only using the [fish shell](https://fishshell.com/)
+> _This is for only using the [fish shell](https://fishshell.com/)_
+
 ```sh
 function task --wraps=go-task --description 'go-task shorthand'
     go-task $argv
@@ -198,14 +238,52 @@ end
 funcsave task
 ```
 
-### Tune selinux
+#### Setup direnv
+
+> [!NOTE]
+> _This is for only using the [fish shell](https://fishshell.com/)_
+
+```sh
+echo "\
+if type -q direnv
+    direnv hook fish | source
+end
+" > ~/.config/fish/conf.d/direnv.fish
+source ~/.config/fish/conf.d/direnv.fish
+```
+
+```sh
+mkdir -p ~/.config/direnv
+echo "\
+[whitelist]
+prefix = [ \"/var/opt/home-service\" ]
+" > ~/.config/direnv/direnv.toml
+```
+
+#### Tune selinux
 
 ```sh
 sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
 ```
 
-### Disable firewalld
+#### Disable firewalld
 
 ```sh
-sudo systemctl mask firewalld.service
+sudo systemctl disable --now firewalld.service
 ```
+
+## Network topology
+
+| Name | Subnet | DHCP range |
+|------|--------|------------|
+| LAN | 192.168.1.0/24 | 6-254 |
+| GUESTS | 192.168.6.0/24 | 6-254 |
+| IOT | 192.168.10.0/24 | 6-254 |
+| CAMERA | 192.168.20.0/24 | 6-254 |
+| TRUSTED | 192.168.30.0/24 | 6-254 |
+| SERVERS | 10.69.1.0/24 | 6-254 |
+
+## Related Projects
+
+- [onedr0p/home-services](https://github.com/onedr0p/home-services/): Original repo where most of the config was taken from.
+- [bjw-s/nix-config](https://github.com/bjw-s/nix-config/): NixOS driven configuration for running a home service machine, a nas or [nix-darwin](https://github.com/LnL7/nix-darwin) using [deploy-rs](https://github.com/serokell/deploy-rs) and [home-manager](https://github.com/nix-community/home-manager).

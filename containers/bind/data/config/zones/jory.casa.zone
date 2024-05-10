@@ -14,10 +14,12 @@ $ORIGIN jory.casa.
 
 ; LAN
 unifi                      IN  A      192.168.1.1
-nahida			           IN  A      192.168.1.2
-tessmart		           IN  A      192.168.1.10
-SMURF-PC                   IN  A      192.168.1.14
-RM0207                     IN  A      192.168.1.121
+nahida	                   IN  A      192.168.1.2
+tessmart                   IN  A      192.168.1.10
+
+; Trusted
+SMURF-PC                   IN  A      192.168.30.14
+RM0207                     IN  A      192.168.30.253
 
 ; Servers
 nginx                      IN  A      10.69.1.2
@@ -33,6 +35,12 @@ nas                        IN  A      10.69.1.100
 amber                      IN  A      10.69.1.101
 celestia                   IN  A      10.69.1.121
 
+; Containers
+traefik                    IN  A      192.168.1.126
+gatus                      IN  A      192.168.1.127
+
 ; CNAME records
+gatus                      IN  CNAME  nahida.jory.casa.
+traefik                    IN  CNAME  nahida.jory.casa.
 minio                      IN  CNAME  nas.jory.casa.
 s3                         IN  CNAME  nas.jory.casa.

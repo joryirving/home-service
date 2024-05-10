@@ -2,6 +2,16 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+env:
+  SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+
+vars:
+  # renovate: datasource=github-releases depName=getsops/sops
+  SOPS_VERSION: v3.8.1
+
+includes:
+  blocky: containers/blocky
+
 tasks:
 
   default:
@@ -11,23 +21,24 @@ tasks:
   deps:
     desc: Install System Deps
     cmds:
-      - sudo rpm-ostree install --idempotent --assumeyes bind-utils git go-task htop nano net-tools netcat nmap moreutils rsync tcpdump telnet tree wget
+      - sudo rpm-ostree install --idempotent --assumeyes age bind-utils direnv expect fish git go-task gron htop moreutils nano net-tools netcat nmap rsync systemd-networkd tcpdump telnet tree wget yq
+      - sudo rpm-ostree install --idempotent --assumeyes https://github.com/getsops/sops/releases/download/{{.SOPS_VERSION}}/sops-{{.SOPS_VERSION | replace "v" ""}}.aarch64.rpm
 
   start-*:
     desc: Start a container service
     cmds:
       - task: .reload
-        vars: { container: "{{.container}}" }
+        vars:
+          container: '{{.container}}'
+          force: '{{.force}}'
       - sudo systemctl start {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
+      force: '{{.force | default "no"}}'
 
   stop-*:
     desc: Stop a container service
-    cmds:
-      - task: .reload
-        vars: { container: "{{.container}}" }
-      - sudo systemctl stop {{.container}}
+    cmd: sudo systemctl stop {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
 
@@ -35,10 +46,13 @@ tasks:
     desc: Restart a container service
     cmds:
       - task: .reload
-        vars: { container: "{{.container}}" }
+        vars:
+          container: '{{.container}}'
+          force: '{{.force}}'
       - sudo systemctl restart {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
+      force: '{{.force | default "no"}}'
 
   status-*:
     desc: Status of a container service
@@ -56,17 +70,20 @@ tasks:
     desc: Reload a container
     cmds:
       - sudo rsync -rv {{.ROOT_DIR}}/containers/{{.container}}/{{.container}}.container /etc/containers/systemd/
-      - sudo rsync -rv --delete {{.ROOT_DIR}}/containers/{{.container}}/data/ /etc/containers/systemd/{{.container}}
+      - sudo rsync -rv --mkpath --delete {{.ROOT_DIR}}/containers/{{.container}}/data/{{- if eq "no" .force }}config/{{ end }} /etc/containers/systemd/{{.container}}{{- if eq "no" .force }}/config{{ end }}
+      - sudo --preserve-env bash -c "find /etc/containers/systemd/{{.container}}/config -type f -name "*.sops.*" -print0 | xargs -0 -I {} sops --config {{.ROOT_DIR}}/.sops.yaml --decrypt --in-place {}"
       - sudo systemctl daemon-reload
+    # Faux idempotency ...
     sources:
-      - "{{.ROOT_DIR}}/containers/{{.container}}.container"
-      - "{{.ROOT_DIR}}/containers/{{.container}}/config/**/**"
+      - "{{.ROOT_DIR}}/containers/{{.container}}/**/**"
+      - excude: "{{.ROOT_DIR}}/containers/{{.container}}/data/cache/**/**"
     generates:
       - /etc/containers/systemd/{{.container}}.container
       - /etc/containers/systemd/{{.container}}/config/**/**
       - /run/systemd/generator/{{.container}}.service
+    label: reload-{{.container}}
     requires:
-      vars: ["container"]
+      vars: ["container", "force"]
     internal: true
 
   bootstrap-nut:

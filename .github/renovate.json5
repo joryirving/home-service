@@ -6,15 +6,7 @@
     ":label(renovate/{{depName}})",
     "security:openssf-scorecard",
     "github>joryirving/renovate-config",
-    "github>joryirving/renovate-config:autoMerge"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": ["Process container versions"],
-      "fileMatch": ["(^|/)containers/.+\\.container$"],
-      "matchStrings": ["Image=(?<depName>\\S+):(?<currentValue>.*?)"],
-      "datasourceTemplate": "docker"
-    }
+    "github>joryirving/renovate-config:autoMerge",
+    "github>joryirving/home-service//.github/renovate/customManagers.json5"
   ]
 }
