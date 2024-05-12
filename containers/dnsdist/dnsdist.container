@@ -1,11 +1,9 @@
 [Unit]
 Description=dnsdist
-Requires=bind.service blocky.service
-After=bind.service blocky.service
 
 [Container]
 ContainerName=dnsdist
-Image=ghcr.io/joryirving/dnsdist:1.9.3@sha256:0c59470c1032f328ed36607f9e479733f2551fa50e4021ebd5441542067a86d7
+Image=ghcr.io/joryirving/dnsdist:1.9.3
 Environment=TZ=America/Edmonton
 Volume=./dnsdist/config/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro
 Network=host

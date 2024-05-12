@@ -1,16 +1,14 @@
 # home-service
 
-My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) with [Fedora IoT](https://fedoraproject.org/iot/). These [podman](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) services are supporting my home infrastructure including, DNS and Kubernetes clusters.
+My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) with [Fedora IoT](https://fedoraproject.org/iot/). Applications are run as [podman](https://github.com/containers/podman) containers and managed by systemd to support my home infrastructure.
 
-## Core Components
+## Core components
 
-- [bws-cache](https://github.com/rippleFCL/bws-cache):Integrate secrets into my infrastructure.
-- [bind9](https://www.isc.org/bind/): Authoritative DNS server for my domains.
-- [blocky](https://github.com/0xERR0R/blocky): Fast and lightweight ad-blocker.
-- [dnsdist](https://dnsdist.org/): A DNS load balancer.
-- [node-exporter](https://github.com/prometheus/node_exporter): Exporter for machine metrics.
-- [podman-exporter](https://github.com/containers/prometheus-podman-exporter): Prometheus exporter for podman.
-- [sops](https://github.com/getsops/sops): Manage secrets which are commited to Git.
+- [direnv](https://github.com/direnv/direnv): Update environment per working directory.
+- [podman](https://github.com/containers/podman): A tool for managing OCI containers and pods with native [systemd](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) integration.
+- [renovate](https://github.com/renovatebot/renovate): Universal dependency automation tool.
+- [sops](https://github.com/getsops/sops): Manage secrets which are commited to Git using [Age](https://github.com/FiloSottile/age) for encryption.
+- [task](https://github.com/go-task/task): A task runner / simpler Make alternative written in Go.
 
 ## Setup
 
@@ -44,17 +42,22 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     ```sh
     export GITHUB_USER="joryirving"
     curl https://github.com/$GITHUB_USER.keys > ~/.ssh/authorized_keys
-    sudo mkdir -p /var/opt/home-service
-    sudo chown -R $(logname):$(logname) /var/opt/home-service
-    cd /var/opt/home-service
-    git clone git@github.com:$GITHUB_USER/home-service.git .
+    sudo install -d -o $(logname) -g $(logname) -m 755 /var/opt/home-service
+    git clone git@github.com:$GITHUB_USER/home-service.git /var/opt/home-service/.
     ```
 
 4. Install additional system deps and reboot
 
     ```sh
-    task deps
+    cd /var/opt/home-service
+    go-task deps
     sudo systemctl reboot
+    ```
+
+5. Create an Age public/private key pair for use with sops
+
+    ```sh
+    age-keygen -o /var/opt/home-service/age.key
     ```
 
 ### Network configuration
@@ -110,155 +113,26 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
 ### Container configuration
 
-#### bind
+> [!TIP]
+> _To encrypt files with sops **replace** the **public key** in the `.sops.yaml` file with **your Age public key**. The format should look similar to the one already present._
+View the individual app folders under [containers](./containers) for documentation on configuring an app container used here, or setup your own by reviewing the structure of this directory.
 
-> [!IMPORTANT]
-> _**Do not** modify the key contents after it's creation, instead create a new key using `tsig-keygen`._
+Using the included [Taskfile](./Taskfile.yaml) there are helper commands to start, stop, restart containers and more. Run the command below to view all available tasks.
 
-1. Create the base rndc key
-
-    ```sh
-    tsig-keygen -a hmac-sha256 rndc-key > ./containers/bind/data/config/rndc.sops.key
-    sops --encrypt --in-place ./containers/bind/data/config/rndc.sops.key
-    ```
-
-2. Create additional rndc keys for external-dns
-
-    ```sh
-    tsig-keygen -a hmac-sha256 kubernetes-main-key > ./containers/bind/data/config/kubernetes-main.sops.key
-    tsig-keygen -a hmac-sha256 kubernetes-utility-key > ./containers/bind/data/config/kubernetes-utility.sops.key
-    sops --encrypt --in-place ./containers/bind/data/config/kubernetes-main.sops.key
-    sops --encrypt --in-place ./containers/bind/data/config/kubernetes-utility.sops.key
-    ```
-
-3. Update `./containers/bind/data/config` with your configuration and then start it
-
-    ```sh
-    task start-bind
-    ```
-
-#### blocky
-
-> [!IMPORTANT]
-> _Blocky can take awhile to start depending on how many blocklists you have configured_
-
-1. Update `./containers/blocky/data/config/config.yaml` with your configuration and then start it
-
-    ```sh
-    task start-blocky
-    ```
-
-#### dnsdist
-
-> [!IMPORTANT]
-> _Prevent `systemd-resolved` from listening on port `53`_
-> ```sh
-> sudo bash -c 'cat << EOF > /etc/systemd/resolved.conf.d/stub-listener.conf
-> [Resolve]
-> DNSStubListener=no'
-> sudo systemctl restart systemd-resolved
-> ```
-
-1. Update `./containers/dnsdist/data/config/dnsdist.conf` with your configuration and then start it
-
-    ```sh
-    task start-dnsdist
-    ```
-
-#### bws-cache
-
-1. Add your `ORG_ID` to `./containers/bws-cache/bws-cache.secret`
-
-2. Create the podman secret
-
-    ```sh
-    sudo podman secret create org_id ./containers/bws-cache/bws-cache.secret
-    ```
-
-3. Start `bws-cache`
-    ```sh
-    task start-bws-cache
-    ```
-
-#### node-exporter
-
-1. Start `node-exporter`
-
-    ```sh
-    task start-node-exporter
-    ```
-
-#### podman-exporter
-
-1. Enable the `podman.socket` service
-
-    ```sh
-    sudo systemctl enable --now podman.socket
-    ```
-
-2. Start `podman-exporter`
-
-    ```sh
-    task start-podman-exporter
-    ```
-
-#### network-utility-tools
-
-1. Install `nut` package and reboot
-
-    ```sh
-    sudo rpm-ostree install --idempotent --assumeyes nut
-    sudo systemctl reboot
-    ```
-
-2. Create password in `./ups/password.secret`
-
-3. Enable `nut` services
-
-    ```sh
-    task boostrap-nut
-    ```
+```sh
+go-task --list
+```
 
 ### Optional configuration
 
-#### Switch to Fish
+#### Fish Shell
+> [!TIP]
+> _[fish shell](https://fishshell.com/) is awesome, you should try fish 🐟._
+> _After running the commands below logout and login again._
 
 ```sh
 chsh -s /usr/bin/fish
-```
-
-#### Alias go-task
-
-> [!NOTE]
-> _This is for only using the [fish shell](https://fishshell.com/)_
-
-```sh
-function task --wraps=go-task --description 'go-task shorthand'
-    go-task $argv
-end
-funcsave task
-```
-
-#### Setup direnv
-
-> [!NOTE]
-> _This is for only using the [fish shell](https://fishshell.com/)_
-
-```sh
-echo "\
-if type -q direnv
-    direnv hook fish | source
-end
-" > ~/.config/fish/conf.d/direnv.fish
-source ~/.config/fish/conf.d/direnv.fish
-```
-
-```sh
-mkdir -p ~/.config/direnv
-echo "\
-[whitelist]
-prefix = [ \"/var/opt/home-service\" ]
-" > ~/.config/direnv/direnv.toml
+go-task fish:deps
 ```
 
 #### Tune selinux
@@ -288,3 +162,4 @@ sudo systemctl disable --now firewalld.service
 
 - [onedr0p/home-services](https://github.com/onedr0p/home-services/): Original repo where most of the config was taken from.
 - [bjw-s/nix-config](https://github.com/bjw-s/nix-config/): NixOS driven configuration for running a home service machine, a nas or [nix-darwin](https://github.com/LnL7/nix-darwin) using [deploy-rs](https://github.com/serokell/deploy-rs) and [home-manager](https://github.com/nix-community/home-manager).
+- [truxnell/nix-config](https://github.com/truxnell/nix-config): NixOS driven configuration for running your entire homelab.

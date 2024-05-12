@@ -3,7 +3,7 @@
 version: "3"
 
 env:
-  SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
 
 vars:
   # renovate: datasource=github-releases depName=getsops/sops
@@ -11,6 +11,7 @@ vars:
 
 includes:
   blocky: containers/blocky
+  fish: .taskfiles/fish
 
 tasks:
 
@@ -21,59 +22,53 @@ tasks:
   deps:
     desc: Install System Deps
     cmds:
-      - sudo rpm-ostree install --idempotent --assumeyes age bind-utils direnv expect fish git go-task gron htop moreutils nano net-tools netcat nmap rsync systemd-networkd tcpdump telnet tree wget yq
+      - sudo rpm-ostree install --idempotent --assumeyes age bind-utils direnv expect fastfetch fish git go-task gron htop moreutils nano net-tools netcat nmap rsync systemd-networkd tcpdump telnet tree wget yq
       - sudo rpm-ostree install --idempotent --assumeyes https://github.com/getsops/sops/releases/download/{{.SOPS_VERSION}}/sops-{{.SOPS_VERSION | replace "v" ""}}.aarch64.rpm
 
   start-*:
     desc: Start a container service
     cmds:
-      - task: .reload
-        vars:
-          container: '{{.container}}'
-          force: '{{.force}}'
+      - task: reload-{{.container}}
       - sudo systemctl start {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
-      force: '{{.force | default "no"}}'
 
   stop-*:
     desc: Stop a container service
     cmd: sudo systemctl stop {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
+    preconditions:
+      - msg: container systemd service '{{.container}}' not found
+        sh: systemctl status {{.container}}
 
   restart-*:
     desc: Restart a container service
     cmds:
-      - task: .reload
-        vars:
-          container: '{{.container}}'
-          force: '{{.force}}'
+      - task: reload-{{.container}}
       - sudo systemctl restart {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
-      force: '{{.force | default "no"}}'
+    preconditions:
+      - msg: container systemd service '{{.container}}' not found
+        sh: systemctl status {{.container}}
 
   status-*:
     desc: Status of a container service
     cmd: sudo systemctl status {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
+    preconditions:
+      - msg: container systemd service '{{.container}}' not found
+        sh: systemctl status {{.container}}
 
-  logs-*:
-    desc: Tail logs of a container
-    cmd: sudo podman logs -f {{.container}}
-    vars:
-      container: '{{index .MATCH 0}}'
-
-  .reload:
-    desc: Reload a container
+  reload-*:
+    desc: Reload a container service
     cmds:
       - sudo rsync -rv {{.ROOT_DIR}}/containers/{{.container}}/{{.container}}.container /etc/containers/systemd/
       - sudo rsync -rv --mkpath --delete {{.ROOT_DIR}}/containers/{{.container}}/data/{{- if eq .CLI_FORCE false }}config/{{ end }} /etc/containers/systemd/{{.container}}{{- if eq .CLI_FORCE false }}/config{{ end }}
       - sudo --preserve-env bash -c "find /etc/containers/systemd/{{.container}}/config -type f -name "*.sops.*" -print0 | xargs -0 -I {} sops --config {{.ROOT_DIR}}/.sops.yaml --decrypt --in-place {}"
       - sudo systemctl daemon-reload
-    # Faux idempotency ...
     sources:
       - "{{.ROOT_DIR}}/containers/{{.container}}/**/**"
       - excude: "{{.ROOT_DIR}}/containers/{{.container}}/data/cache/**/**"
@@ -82,9 +77,34 @@ tasks:
       - /etc/containers/systemd/{{.container}}/config/**/**
       - /run/systemd/generator/{{.container}}.service
     label: reload-{{.container}}
-    requires:
-      vars: ["container", "force"]
-    internal: true
+    preconditions:
+      - msg: file 'containers/{{.container}}/{{.container}}.container' not found
+        sh: test -f {{.ROOT_DIR}}/containers/{{.container}}/{{.container}}.container
+      - msg: directory 'containers/{{.container}}/data' not found
+        sh: test -d {{.ROOT_DIR}}/containers/{{.container}}/data
+    vars:
+      container: '{{index .MATCH 0}}'
+
+  remove-*:
+    desc: Remove a container service
+    prompt: Remove the '{{.container}}' container ... continue?
+    cmds:
+      - task: stop-{{.container}}
+      - sudo rm /etc/containers/systemd/{{.container}}.container
+      - sudo rm -rf /etc/containers/systemd/{{.container}}
+      - sudo rm -rf /run/systemd/generator/{{.container}}.service
+      - sudo systemctl daemon-reload
+    vars:
+      container: '{{index .MATCH 0}}'
+
+  logs-*:
+    desc: Tail logs of a container
+    cmd: sudo podman logs -f {{.container}}
+    vars:
+      container: '{{index .MATCH 0}}'
+    preconditions:
+      - msg: container '{{.container}}' not found
+        sh: sudo podman inspect {{.container}}
 
   bootstrap-nut:
     desc: Copy NUT config files
