@@ -45,3 +45,4 @@ bws-cache                  IN  CNAME  traefik.jory.casa.
 status                     IN  CNAME  traefik.jory.casa.
 minio                      IN  CNAME  nas.jory.casa.
 s3                         IN  CNAME  nas.jory.casa.
+smurf-raid                 IN  CNAME  nas.jory.casa.
