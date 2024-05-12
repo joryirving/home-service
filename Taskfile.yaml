@@ -12,6 +12,7 @@ vars:
 includes:
   blocky: containers/blocky
   fish: .taskfiles/fish
+  nut: .taskfiles/nut
 
 tasks:
 
@@ -105,11 +106,3 @@ tasks:
     preconditions:
       - msg: container '{{.container}}' not found
         sh: sudo podman inspect {{.container}}
-
-  bootstrap-nut:
-    desc: Copy NUT config files
-    cmds:
-      - sudo rsync -rv --delete {{.ROOT_DIR}}/ups/ /etc/ups/
-      - sudo sed -i "s/pass_placeholder/$(cat ./ups/password.secret | sed 's/\//\\\//g')/" /etc/ups/* | bash
-      - sudo systemctl enable --now nut.target nut-monitor nut-server
-      - sudo usbhid-ups -a networkups

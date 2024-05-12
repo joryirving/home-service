@@ -16,5 +16,5 @@ https://networkupstools.org/
 3. Enable `nut` services
 
     ```sh
-    task boostrap-nut
+    task nut:bootstrap
     ```
