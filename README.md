@@ -115,7 +115,8 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
 > [!TIP]
 > _To encrypt files with sops **replace** the **public key** in the `.sops.yaml` file with **your Age public key**. The format should look similar to the one already present._
-View the individual app folders under [containers](./containers) for documentation on configuring an app container used here, or setup your own by reviewing the structure of this directory.
+
+View the [apps](./apps) directory for documentation on configuring an app container used here, or setup your own by reviewing the structure of this repository.
 
 Using the included [Taskfile](./Taskfile.yaml) there are helper commands to start, stop, restart containers and more. Run the command below to view all available tasks.
 
@@ -125,14 +126,13 @@ go-task --list
 
 ### Optional configuration
 
-#### Fish Shell
 > [!TIP]
 > _[fish shell](https://fishshell.com/) is awesome, you should try fish 🐟._
 > _After running the commands below logout and login again._
 
 ```sh
 chsh -s /usr/bin/fish
-go-task fish:deps
+go-task deps
 ```
 
 #### Tune selinux

@@ -7,6 +7,63 @@
     "security:openssf-scorecard",
     "github>joryirving/renovate-config",
     "github>joryirving/renovate-config:autoMerge",
-    "github>joryirving/home-service//.github/renovate/customManagers.json5"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": ["Process container versions"],
+      "fileMatch": ["(^|/)apps/.+\\.container$"],
+      "matchStrings": [
+        "Image=(?<depName>[^:]+):(?<currentValue>[^\\s@]+)(@(?<currentDigest>sha256:[0-9a-f]+))?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": ["Process taskfile dependencies"],
+      "fileMatch": ["(^|/)Taskfile\\.ya?ml$"],
+      "matchStrings": [
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+: (&\\S+\\s)?(?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "addLabels": ["renovate/container", "type/major"],
+      "additionalBranchPrefix": "{{parentDir}}-",
+      "commitMessageExtra": " ( {{currentVersion}} → {{newVersion}} )",
+      "commitMessagePrefix": "feat({{parentDir}})!: ",
+      "commitMessageTopic": "{{depName}}",
+      "labels": ["app/{{parentDir}}"],
+      "matchDatasources": ["docker"],
+      "matchFileNames": ["apps/**/*.container"],
+      "matchUpdateTypes": ["major"]
+    },
+    {
+      "addLabels": ["renovate/container", "type/minor"],
+      "additionalBranchPrefix": "{{parentDir}}-",
+      "commitMessageExtra": "( {{currentVersion}} → {{newVersion}} )",
+      "commitMessageTopic": "{{depName}}",
+      "labels": ["app/{{parentDir}}"],
+      "matchDatasources": ["docker"],
+      "matchFileNames": ["apps/**/*.container"],
+      "matchUpdateTypes": ["minor"],
+      "semanticCommitScope": "{{parentDir}}",
+      "semanticCommitType": "feat"
+    },
+    {
+      "addLabels": ["renovate/container", "type/patch"],
+      "additionalBranchPrefix": "{{parentDir}}-",
+      "commitMessageExtra": "( {{currentVersion}} → {{newVersion}} )",
+      "commitMessageTopic": "{{depName}}",
+      "labels": ["app/{{parentDir}}"],
+      "matchDatasources": ["docker"],
+      "matchFileNames": ["apps/**/*.container"],
+      "matchUpdateTypes": ["patch"],
+      "semanticCommitScope": "{{parentDir}}",
+      "semanticCommitType": "fix"
+    }
   ]
 }
