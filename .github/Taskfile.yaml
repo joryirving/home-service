@@ -1,9 +1,16 @@
 ---
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
-
 vars:
-  LABELS_CONFIG_FILE: '{{.ROOT_DIR}}/labels.yaml
+  LABELS_CONFIG_FILE: '{{.ROOT_DIR}}/labels.yaml'
+
+x-preconditions:
+  - &not-root
+    msg: must not be run as root
+    sh: '[[ $LOGNAME != "root" ]]'
+  - &gh-workflow
+    msg: must only be ran in a GH workflow
+    sh: '[[ -z {{.CLI_FORCE}} ]]'
 
 tasks:
 
@@ -17,5 +24,5 @@ tasks:
       apps:
         sh: for dir in {{.ROOT_DIR}}/../apps/*/; do basename "${dir}"; done
     preconditions:
-      - msg: must only be ran in a GH workflow
-        sh: '[[ -z {{.CLI_FORCE}} ]]'
+      - *not-root
+      - *gh-workflow

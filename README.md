@@ -103,7 +103,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     Address = 192.168.1.120/24'
     ```
 
-5. Disable `networkmanager`, the enable and start `systemd-networkd`
+4. Disable `networkmanager`, the enable and start `systemd-networkd`
 
     ```sh
     sudo systemctl disable --now NetworkManager
@@ -139,6 +139,7 @@ go-task deps
 
 ```sh
 sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+sudo systemctl reboot
 ```
 
 #### Disable firewalld

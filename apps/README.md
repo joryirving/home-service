@@ -2,9 +2,9 @@
 
 ## bind
 
-https://www.isc.org/bind/
+<https://www.isc.org/bind/>
 
-### Configuration
+### bind configuration
 
 > [!IMPORTANT]
 > _**Do not** modify the key contents after it's creation, instead create a new key using `tsig-keygen`._
@@ -15,7 +15,9 @@ https://www.isc.org/bind/
     sops --encrypt --in-place ./apps/bind/data/config/rndc.sops.key
     ```
 
-2. Update `./apps/bind/data/config` with your configuration and then start it
+2. [Optional] Create additional rndc keys for external-dns and encrypt them with sops
+
+3. Update `./apps/bind/data/config` with your configuration and then start it
 
     ```sh
     task start-bind
@@ -32,9 +34,9 @@ https://www.isc.org/bind/
 
 ## blocky
 
-https://github.com/0xERR0R/blocky
+<https://github.com/0xERR0R/blocky>
 
-### Configuration
+### blocky configuration
 
 > [!IMPORTANT]
 > _Blocky can take awhile to start depending on how many blocklists you have configured_
@@ -46,9 +48,9 @@ https://github.com/0xERR0R/blocky
 
 ## dnsdist
 
-https://dnsdist.org
+<https://dnsdist.org>
 
-### Configuration
+### dnsdist configuration
 
 1. Update `./apps/dnsdist/data/config/dnsdist.conf` with your configuration and then start it
 
@@ -58,7 +60,7 @@ https://dnsdist.org
 
 ## bws-cache
 
-https://bitwarden.com/help/secrets-manager-cli/
+<https://bitwarden.com/help/secrets-manager-cli/>
 
 ## Configuration
 
@@ -78,7 +80,7 @@ https://bitwarden.com/help/secrets-manager-cli/
 
 ## podman-exporter
 
-https://github.com/containers/prometheus-podman-exporter
+<https://github.com/containers/prometheus-podman-exporter>
 
 ### Configuration
 
