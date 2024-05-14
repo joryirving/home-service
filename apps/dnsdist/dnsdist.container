@@ -3,7 +3,7 @@ Description=dnsdist
 
 [Container]
 ContainerName=dnsdist
-Image=ghcr.io/joryirving/dnsdist:1.9.3
+Image=ghcr.io/joryirving/dnsdist:1.9.4
 Environment=TZ=America/Edmonton
 Volume=./dnsdist/config/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro
 Network=host
