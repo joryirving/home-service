@@ -16,6 +16,7 @@ $ORIGIN jory.casa.
 unifi                      IN  A      192.168.1.1
 nahida	                   IN  A      192.168.1.2
 tessmart                   IN  A      192.168.1.10
+pikvm                      IN  A      192.168.1.11
 
 ; Trusted
 SMURF-PC                   IN  A      192.168.30.14
