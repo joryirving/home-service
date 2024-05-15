@@ -115,3 +115,8 @@ endpoints:
     url: icmp://10.69.1.101
     conditions: ["[CONNECTED] == true"]
     alerts: [{ type: discord }]
+  - name: PiKVM (ICMP)
+    group: Devices
+    url: icmp://192.168.1.11
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: pushover }]
