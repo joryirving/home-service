@@ -167,6 +167,6 @@ sudo systemctl disable --now firewalld.service
 
 ## Related Projects
 
-- [onedr0p/home-services](https://github.com/onedr0p/home-services/): Original repo where most of the config was taken from.
+- [onedr0p/home-service](https://github.com/onedr0p/home-service/): Original repo where most of the config was taken from.
 - [bjw-s/nix-config](https://github.com/bjw-s/nix-config/): NixOS driven configuration for running a home service machine, a nas or [nix-darwin](https://github.com/LnL7/nix-darwin) using [deploy-rs](https://github.com/serokell/deploy-rs) and [home-manager](https://github.com/nix-community/home-manager).
 - [truxnell/nix-config](https://github.com/truxnell/nix-config): NixOS driven configuration for running your entire homelab.

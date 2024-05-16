@@ -15,13 +15,13 @@ upstreams:
 conditional:
   fallbackUpstream: false
   mapping:
-    internal: 192.168.1.123
-    jory.dev: 192.168.1.123
-    j8g.dev: 192.168.1.123
-    jory.casa: 192.168.1.123
+    internal: 192.168.1.121
+    jory.dev: 192.168.1.121
+    j8g.dev: 192.168.1.121
+    jory.casa: 192.168.1.121
 
 clientLookup:
-  upstream: 192.168.1.123
+  upstream: 192.168.1.121
 
 ecs:
   useAsClient: true
