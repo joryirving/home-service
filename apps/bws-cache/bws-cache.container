@@ -1,5 +1,7 @@
 [Unit]
 Description=bws-cache
+After=network-online.target
+Wants=network-online.target
 
 [Container]
 ContainerName=bws-cache

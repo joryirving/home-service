@@ -1,5 +1,7 @@
 [Unit]
 Description=dnsdist
+After=network-online.target
+Wants=network-online.target
 
 [Container]
 ContainerName=dnsdist

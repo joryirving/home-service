@@ -1,5 +1,7 @@
 [Unit]
 Description=traefik
+After=network-online.target
+Wants=network-online.target
 
 [Container]
 ContainerName=traefik

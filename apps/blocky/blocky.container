@@ -1,5 +1,7 @@
 [Unit]
 Description=blocky
+After=network-online.target
+Wants=network-online.target
 
 [Container]
 ContainerName=blocky
