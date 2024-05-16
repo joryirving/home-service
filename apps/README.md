@@ -46,18 +46,6 @@
     task start-blocky
     ```
 
-## dnsdist
-
-<https://dnsdist.org>
-
-### dnsdist configuration
-
-1. Update `./apps/dnsdist/data/config/dnsdist.conf` with your configuration and then start it
-
-    ```sh
-    task start-dnsdist
-    ```
-
 ## bws-cache
 
 <https://bitwarden.com/help/secrets-manager-cli/>
