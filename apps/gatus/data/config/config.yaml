@@ -22,23 +22,9 @@ endpoints:
   #
   # DNS group
   #
-  - name: dnsdist-external
-    group: DNS
-    url: 192.168.1.121:53
-    dns:
-      query-name: google.com
-      query-type: A
-    conditions: ["[DNS_RCODE] == NOERROR"]
-  - name: dnsdist-internal
-    group: DNS
-    url: 192.168.1.121:53
-    dns:
-      query-name: nahida.jory.casa
-      query-type: A
-    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
   - name: bind-internal
     group: DNS
-    url: 192.168.1.123:53
+    url: 192.168.1.121:53
     dns:
       query-name: nahida.jory.casa
       query-type: A
