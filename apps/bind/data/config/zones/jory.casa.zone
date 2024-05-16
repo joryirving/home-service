@@ -18,10 +18,6 @@ nahida	                   IN  A      192.168.1.2
 tessmart                   IN  A      192.168.1.10
 pikvm                      IN  A      192.168.1.11
 
-; Trusted
-SMURF-PC                   IN  A      192.168.30.14
-RM0207                     IN  A      192.168.30.253
-
 ; Servers
 nginx                      IN  A      10.69.1.2
 ayaka                      IN  A      10.69.1.21

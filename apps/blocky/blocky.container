@@ -8,8 +8,9 @@ ContainerName=blocky
 Image=ghcr.io/0xerr0r/blocky:v0.23
 Environment=TZ=America/Edmonton
 Volume=./blocky/config/config.yaml:/app/config.yml:ro
-Network=containernet
-IP=192.168.1.122
+Network=host
+#Network=containernet
+#IP=192.168.1.121
 AddCapability=NET_BIND_SERVICE
 # Traefik
 Label=traefik.enable="true"

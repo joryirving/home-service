@@ -20,8 +20,6 @@ $ORIGIN in-addr.arpa.
 2.1.168.192	               IN  PTR    nahida.jory.casa.
 10.1.168.192               IN  PTR    tessmart.jory.casa.
 11.1.168.192               IN  PTR    pikvm.jory.casa.
-14.30.168.192              IN  PTR    smurf-pc.jory.casa.
-253.30.168.192             IN  PTR    RM0207.jory.casa.
 
 ; Containers
 126.1.168.192              IN  PTR    traefik.jory.casa.
