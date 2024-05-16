@@ -15,12 +15,10 @@ upstreams:
 conditional:
   fallbackUpstream: false
   mapping:
-    internal: 192.168.1.1
+    internal: 192.168.1.123
     jory.dev: 192.168.1.123
     j8g.dev: 192.168.1.123
     jory.casa: 192.168.1.123
-    168.192.in-addr.arpa: 192.168.1.123
-    69.10.in-addr.arpa: 192.168.1.123
 
 clientLookup:
   upstream: 192.168.1.123

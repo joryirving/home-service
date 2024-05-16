@@ -33,8 +33,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 2. Install required system deps and reboot
 
     ```sh
-    sudo rpm-ostree install --idempotent --assumeyes git go-task
-    sudo systemctl reboot
+    sudo rpm-ostree install --reboot --idempotent --assumeyes git go-task
     ```
 
 3. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo
