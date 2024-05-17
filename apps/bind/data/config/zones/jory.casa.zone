@@ -1,7 +1,7 @@
 ; SOA Records
 $TTL 3600
 $ORIGIN jory.casa.
-@ 3600 IN SOA jory.casa. nahida.jory.casa. (
+@ 3600 IN SOA jory.casa. nahida.internal. (
     0000000001         ; serial number
     7200               ; refresh period
     3600               ; retry period
@@ -10,27 +10,10 @@ $ORIGIN jory.casa.
 )
 
 ; NS Records
-@                          IN  NS     nahida.jory.casa.
+@                          IN  NS     nahida.internal.
 
 ; LAN
 unifi                      IN  A      192.168.1.1
-nahida	                   IN  A      192.168.1.2
-tessmart                   IN  A      192.168.1.10
-pikvm                      IN  A      192.168.1.11
-
-; Servers
-nginx                      IN  A      10.69.1.2
-ayaka                      IN  A      10.69.1.21
-eula                       IN  A      10.69.1.22
-ganyu                      IN  A      10.69.1.23
-hutao                      IN  A      10.69.1.24
-navia                      IN  A      10.69.1.25
-yelan                      IN  A      10.69.1.26
-ubuntu-server              IN  A      10.69.1.98
-smurf-lab                  IN  A      10.69.1.99
-nas                        IN  A      10.69.1.100
-amber                      IN  A      10.69.1.101
-celestia                   IN  A      10.69.1.121
 
 ; Containers
 traefik                    IN  A      192.168.1.125
@@ -40,6 +23,3 @@ gatus                      IN  A      192.168.1.126
 blocky                     IN  CNAME  traefik.jory.casa.
 bws-cache                  IN  CNAME  traefik.jory.casa.
 status                     IN  CNAME  traefik.jory.casa.
-minio                      IN  CNAME  nas.jory.casa.
-s3                         IN  CNAME  nas.jory.casa.
-smurf-raid                 IN  CNAME  nas.jory.casa.

@@ -4,34 +4,38 @@ ports:
   http: 0.0.0.0:4000
 
 bootstrapDns:
-  - tcp+udp:1.1.1.1
-  - tcp+udp:1.0.0.1
   - https://1.1.1.1/dns-query
   - https://1.0.0.1/dns-query
 
 upstreams:
   groups:
     default:
-      - tcp-tls:1.1.1.1:853
-      - tcp-tls:1.0.0.1:853
+      - https://1.1.1.1/dns-query
+      - https://1.0.0.1/dns-query
     kenna*:
-      - tcp-tls:1.1.1.3:853
-      - tcp-tls:1.0.0.3:853
+      - https://1.1.1.3/dns-query
+      - https://1.0.0.3/dns-query
 
 conditional:
   fallbackUpstream: false
   mapping:
-    168.192.in-addr.arpa: 192.168.1.121
+    # Forward to router
+    168.192.in-addr.arpa: 192.168.1.1
+    69.10.in-addr.arpa: 192.168.1.1
+    internal: 192.168.1.1
+    # Forward to bind
     jory.dev: 192.168.1.121
-    internal: 192.168.1.121
     j8g.dev: 192.168.1.121
     jory.casa: 192.168.1.121
 
 clientLookup:
-  upstream: 192.168.1.121
+  upstream: 192.168.1.1
+
+connectIPVersion: v4
 
 caching:
-  cacheTimeNegative: -1
+  minTime: 15m
+  prefetching: true
 
 ecs:
   useAsClient: true
