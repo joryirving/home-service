@@ -59,6 +59,6 @@ serversTransport:
 http:
   routers:
     dashboard:
-      rule: Host(`traefik.jory.dev`)
+      rule: Host(`traefik.jory.casa`)
       entryPoints: ["web"]
       service: api@internal

@@ -15,15 +15,16 @@ $ORIGIN jory.dev.
 ; LAN
 unifi                      IN  A      192.168.1.1
 
+; Servers
+voyager                    In  A      10.69.1.100
+
 ; Containers
+bws-cache                  IN  A      192.168.1.124
 traefik                    IN  A      192.168.1.125
 gatus                      IN  A      192.168.1.126
 
 ; CNAME records
-blocky                     IN  CNAME  traefik.jory.dev.
-bws-cache                  IN  CNAME  traefik.jory.dev.
-status                     IN  CNAME  traefik.jory.dev.
-minio                      IN  CNAME  voyager.internal.
-nas                        IN  CNAME  voyager.internal.
-portainer                  IN  CNAME  voyager.internal.
-s3                         IN  CNAME  voyager.internal.
+minio                      IN  CNAME  voyager.jory.dev.
+nas                        IN  CNAME  voyager.jory.dev.
+portainer                  IN  CNAME  voyager.jory.dev.
+s3                         IN  CNAME  voyager.jory.dev.

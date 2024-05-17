@@ -14,7 +14,7 @@ AddCapability=NET_BIND_SERVICE
 AddCapability=NET_RAW
 # Traefik
 Label=traefik.enable="true"
-Label=traefik.http.routers.gatus.rule=Host'(`gatus.jory.dev`)'
+Label=traefik.http.routers.gatus.rule=Host'(`status.jory.casa`)'
 Label=traefik.http.routers.gatus.entrypoints="web"
 Label=traefik.http.services.gatus.loadbalancer.server.port="80"
 
