@@ -84,7 +84,11 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     Name = end0
     [Network]
     DHCP = yes
-    IPVLAN = containernet'
+    DNS = 1.1.1.1
+    DNS = 1.0.0.1
+    IPVLAN = containernet
+    [DHCPv4]
+    UseDNS = false'
     ```
 
 3. Setup `containernet` with `systemd-networkd`
