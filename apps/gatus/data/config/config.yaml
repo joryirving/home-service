@@ -42,7 +42,7 @@ endpoints:
     dns:
       query-name: nahida.jory.casa
       query-type: A
-    conditions: ["[DNS_RCODE] == NXDOMAIN"]
+    conditions: ["[DNS_RCODE] == NOERROR"]
   #
   # Devices group
   #

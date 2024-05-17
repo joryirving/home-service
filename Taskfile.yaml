@@ -41,7 +41,6 @@ tasks:
     cmds:
       - sudo rpm-ostree install --idempotent --assumeyes age bind-utils direnv expect fastfetch fish fzf gh git go-task gron htop moreutils nano net-tools netcat nmap rsync systemd-networkd tcpdump telnet tree wget yq zoxide
       - sudo rpm-ostree install --idempotent --assumeyes https://github.com/getsops/sops/releases/download/{{.SOPS_VERSION}}/sops-{{.SOPS_VERSION | replace "v" ""}}.aarch64.rpm
-      - task: dotfiles
     preconditions:
       - *not-root
 
@@ -135,7 +134,7 @@ tasks:
       - *container-not-found
 
   dotfiles:
-    internal: true
+    desc: Setup dotfiles
     cmds:
       - | # Nano
         git -C ~/.nano pull || git clone https://github.com/galenguyer/nano-syntax-highlighting ~/.nano
@@ -172,3 +171,5 @@ tasks:
       - | # Fish Completions
         curl -fsSL -o /home/$LOGNAME/.config/fish/completions/task.fish \
             https://raw.githubusercontent.com/go-task/task/main/completion/fish/task.fish
+    preconditions:
+      - *not-root
