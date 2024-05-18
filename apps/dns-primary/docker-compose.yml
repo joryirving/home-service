@@ -1,6 +1,7 @@
 services:
   bind:
     image: docker.io/ubuntu/bind9:9.18-22.04_beta
+    container_name: bind
     restart: unless-stopped
     user: "0" # root
     environment:
@@ -17,6 +18,7 @@ services:
 
   blocky:
     image: ghcr.io/0xerr0r/blocky:v0.23
+    container_name: blocky
     restart: unless-stopped
     environment:
       - TZ=America/Edmonton

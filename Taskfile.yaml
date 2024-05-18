@@ -19,6 +19,9 @@ x-preconditions:
   - &not-root
     msg: must not be run as root
     sh: '[[ $LOGNAME != "root" ]]'
+  - &container-service-not-found
+    msg: container service '{{.container}}' not found
+    sh: test -f /var/opt/{{.container}}/docker-compose.yml
   - &container-not-found
     msg: container '{{.container}}' not found
     sh: docker inspect {{.container}}
@@ -58,35 +61,42 @@ tasks:
     desc: Start a container service
     cmds:
       - task: reload-{{.container}}
-      - docker compose -f /var/opt/{{.container}}/docker-compose.yml up -d  --force-recreate
+      - docker compose -f /var/opt/{{.container}}/docker-compose.yml up -d
       - sudo docker ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
       - *not-root
 
-  stop-*: 
-    desc: Stop docker compose
-    dir: "{{.ROOT_DIR}}/apps/{{.container}}"
-    cmd: docker compose down
+  stop-*:
+    desc: Stop a container service
+    cmd: docker compose -f /var/opt/{{.container}}/docker-compose.yml down
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
       - *not-root
+      - *container-service-not-found
 
-  decrypt:
-    desc: decrypt files
+  restart-*:
+    desc: Restart a container service
     cmds:
-      - find ./ -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --decrypt --in-place {}
+      - task: reload-{{.container}}
+      - docker compose -f /var/opt/{{.container}}/docker-compose.yml restart
+      - sudo docker ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
+    vars:
+      container: '{{index .MATCH 0}}'
     preconditions:
       - *not-root
+      - *container-service-not-found
 
-  encrypt:
-    desc: encrypt files
-    cmds:
-      - find ./ -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --encrypt --in-place {}
+  status-*:
+    desc: Status of a container service
+    cmd: docker compose -f /var/opt/{{.container}}/docker-compose.yml ps
+    vars:
+      container: '{{index .MATCH 0}}'
     preconditions:
       - *not-root
+      - *container-service-not-found
 
   reload-*:
     desc: Reload a container service
@@ -108,6 +118,26 @@ tasks:
       - *container-directory-not-found
     vars:
       container: '{{index .MATCH 0}}'
+
+  remove-*:
+    desc: Remove a container service
+    prompt: Remove the '{{.container}}' container ... continue?
+    cmds:
+      - task: stop-{{.container}}
+      - sudo rm -rf /var/opt/{{.container}}
+    vars:
+      container: '{{index .MATCH 0}}'
+    preconditions:
+      - *not-root
+
+  logs-*:
+    desc: Tail logs of a container
+    cmd: sudo docker logs -f {{.container}}
+    vars:
+      container: '{{index .MATCH 0}}'
+    preconditions:
+      - *not-root
+      - *container-not-found
 
   dotfiles:
     desc: Setup dotfiles
