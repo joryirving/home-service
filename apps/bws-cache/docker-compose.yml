@@ -1,8 +1,7 @@
 services:
   bws-cache:
     image: ghcr.io/ripplefcl/bws-cache:latest
-    environment:
-      ORG_ID: <value>
+    env_file:
+    - path: ./config/config.sops.env
     ports:
       - '5000:5000'
-

@@ -28,8 +28,8 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     ```sh
     export GITHUB_USER="joryirving"
     curl https://github.com/$GITHUB_USER.keys > ~/.ssh/authorized_keys
-    sudo install -d -o $(logname) -g $(logname) -m 755 /var/opt/home-service
-    git clone git@github.com:$GITHUB_USER/home-service.git /var/opt/home-service/.
+    sudo install -d -o $(logname) -g $(logname) -m 755 ~/git/home-service
+    git clone git@github.com:$GITHUB_USER/home-service.git /~/git/home-service.
     ```
 
 4. Install additional system deps and reboot
@@ -47,7 +47,14 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     newgrp docker
     ```
 
-6. Create an Age public/private key pair for use with sops
+6. Docker permissions suck. I suck at fixing them. This is my shitty hack:
+
+    ```sh
+    sudo chmod -R 777 ./apps/dns/
+    sudo chmod -R 644 ./apps/dns/*/bind/data/config/*.conf
+    ```
+
+7. Create an Age public/private key pair for use with sops
 
     ```sh
     age-keygen -o /var/opt/home-service/age.key

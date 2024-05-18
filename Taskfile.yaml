@@ -19,15 +19,12 @@ x-preconditions:
   - &not-root
     msg: must not be run as root
     sh: '[[ $LOGNAME != "root" ]]'
-  - &container-service-not-found
-    msg: container service '{{.container}}' not found
-    sh: systemctl status {{.container}}
   - &container-not-found
     msg: container '{{.container}}' not found
-    sh: sudo podman inspect {{.container}}
+    sh: docker inspect {{.container}}
   - &container-file-not-found
-    msg: file 'apps/{{.container}}/{{.container}}.container' not found
-    sh: test -f {{.ROOT_DIR}}/apps/{{.container}}/{{.container}}.container
+    msg: file 'apps/{{.container}}/docker-compose.yml' not found
+    sh: test -f {{.ROOT_DIR}}/apps/{{.container}}/docker-compose.yml
   - &container-directory-not-found
     msg: directory 'apps/{{.container}}/data' not found
     sh: test -d {{.ROOT_DIR}}/apps/{{.container}}/data
@@ -53,39 +50,16 @@ tasks:
       - sudo apt install -y ./fastfetch-linux-aarch64.deb
       - sudo rm sops_{{.SOPS_VERSION | replace "v" ""}}_arm64.deb
       - sudo rm fastfetch-linux-aarch64.deb
+      - sudo install -d -o $(logname) -g $(logname) -m 755 /var/opt
     preconditions:
       - *not-root
 
-  dns-start-primary:
-    desc: Restart docker compose
-    dir: "{{.ROOT_DIR}}/apps/dns/primary/"
+  start-*:
+    desc: Start a container service
     cmds:
-      - task: decrypt
-      - docker compose up -d --force-recreate
-      - defer: { task: encrypt }
-    preconditions:
-      - *not-root
-    
-  dns-start-secondary:
-    desc: Restart docker compose
-    dir: "{{.ROOT_DIR}}/apps/dns/secondary/"
-    cmds:
-      - docker compose up -d --force-recreate
-    preconditions:
-      - *not-root
-
-  dns-stop-*: 
-    desc: Stop docker compose
-    cmd: docker compose -f ./apps/dns/{{.dns}}/docker-compose.yml down
-    vars:
-      dns: '{{index .MATCH 0}}'
-    preconditions:
-      - *not-root
-
-  start-*: 
-    desc: Start docker compose
-    dir: "{{.ROOT_DIR}}/apps/{{.container}}"
-    cmd: docker compose up -d --force-recreate
+      - task: reload-{{.container}}
+      - docker compose -f /var/opt/{{.container}}/docker-compose.yml up -d  --force-recreate
+      - sudo docker ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -103,16 +77,37 @@ tasks:
   decrypt:
     desc: decrypt files
     cmds:
-      - find ./apps/dns/primary/bind/data/config -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --decrypt --in-place {}
+      - find ./ -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --decrypt --in-place {}
     preconditions:
       - *not-root
 
   encrypt:
     desc: encrypt files
     cmds:
-      - find ./apps/dns/primary/bind/data/config -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --encrypt --in-place {}
+      - find ./ -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --encrypt --in-place {}
     preconditions:
       - *not-root
+
+  reload-*:
+    desc: Reload a container service
+    cmds:
+      # - sudo rsync -rv {{.ROOT_DIR}}/apps/{{.container}}/docker-compose.yml /var/opt/{{.container}}/
+      # - sudo rsync -rv --mkpath --delete {{.ROOT_DIR}}/apps/{{.container}}/data/{{- if eq .CLI_FORCE false }}config/{{ end }} /var/opt/{{.container}}{{- if eq .CLI_FORCE false }}/config{{ end }}
+      - sudo rsync -rv {{.ROOT_DIR}}/apps/{{.container}}/ /var/opt/{{.container}}/
+      - sudo --preserve-env bash -c "find /var/opt/{{.container}} -type f -name "*.sops.*" -print0 | xargs -0 -I {} sops --config {{.ROOT_DIR}}/.sops.yaml --decrypt --in-place {}"
+    sources:
+      - '{{.ROOT_DIR}}/apps/{{.container}}/docker-compose.yml'
+      - '{{.ROOT_DIR}}/apps/{{.container}}/data/config/**/**'
+    generates:
+      - /var/opt/{{.container}}/docker-compose.yml
+      - /var/opt/{{.container}}/config/**/**
+    label: reload-{{.container}}
+    preconditions:
+      - *not-root
+      - *container-file-not-found
+      - *container-directory-not-found
+    vars:
+      container: '{{index .MATCH 0}}'
 
   dotfiles:
     desc: Setup dotfiles
@@ -123,7 +118,7 @@ tasks:
         mkdir -p /home/$LOGNAME/.config/direnv && \
         tee /home/$LOGNAME/.config/direnv/direnv.toml > /dev/null <<EOF
         [whitelist]
-        prefix = [ "/var/opt/home-service" ]
+        prefix = [ "~/git/home-service" ]
         EOF
       - | # Fish Hooks
         tee /home/$LOGNAME/.config/fish/conf.d/hooks.fish > /dev/null <<EOF
