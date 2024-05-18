@@ -14,26 +14,13 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
 ### System configuration
 
-1. Install Fedora IoT on Storage(SD Card/SSD) using [arm-image-installer](https://pagure.io/arm-image-installer/releases)
-
-    ```sh 
-    sudo apt install selinux-utils -y
-    export GITHUB_USER="joryirving"
-    curl https://github.com/$GITHUB_USER.keys > ~/authorized_keys
-    wget https://pagure.io/arm-image-installer/archive/arm-image-installer-4.1/arm-image-installer-arm-image-installer-4.1.tar.gz
-    tar -xvf arm-image-installer-arm-image-installer-4.1.tar.gz
-    wget https://download.fedoraproject.org/pub/alt/iot/40/IoT/aarch64/images/Fedora-IoT-raw-40-20240422.3.aarch64.raw.xz
-    lsblk
-    ## Note the device you're using
-    sudo ./arm-image-installer-arm-image-installer-4.1/arm-image-installer --image=./Fedora-IoT-raw-40-20240422.3.aarch64.raw.xz --target=rpi4 --media=/dev/sdb --addkey=./authorized_keys --resizefs --selinux=OFF -y
-    ```
 > [!IMPORTANT]
 > A non-root user must be created (if not already) and used.
 
 2. Install required system deps and reboot
 
     ```sh
-    sudo rpm-ostree install --reboot --idempotent --assumeyes git go-task
+    sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
     ```
 
 3. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo
@@ -49,8 +36,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
     ```sh
     cd /var/opt/home-service
-    go-task deps
-    sudo systemctl reboot
+    task deps
     ```
 
 5. Create an Age public/private key pair for use with sops
@@ -59,59 +45,10 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     age-keygen -o /var/opt/home-service/age.key
     ```
 
-### Network configuration
-
-> [!NOTE]
-> _I am using [ipvlan](https://docs.docker.com/network/drivers/ipvlan) to expose most containers on their own IP addresses on the same network as this here device, the available addresses are mentioned in the `--ip-range` flag below. **Beware** of **IP addressing** and **interface names**._
-
-1. Create the podman `containernet` network
+6. Change owner of dns folders
 
     ```sh
-    sudo podman network create \
-        --driver=ipvlan \
-        --ipam-driver=host-local \
-        --subnet=192.168.1.0/24 \
-        --gateway=192.168.1.1 \
-        --ip-range=192.168.1.121-192.168.1.149 \
-        containernet
-    ```
-
-2. Setup the currently used interface with `systemd-networkd`
-
-    ```sh
-    sudo bash -c 'cat << EOF > /etc/systemd/network/end0.network
-    [Match]
-    Name = end0
-    [Network]
-    DHCP = yes
-    DNS = 1.1.1.1
-    DNS = 1.0.0.1
-    IPVLAN = containernet
-    [DHCPv4]
-    UseDNS = false'
-    ```
-
-3. Setup `containernet` with `systemd-networkd`
-
-    ```sh
-    sudo bash -c 'cat << EOF > /etc/systemd/network/containernet.netdev
-    [NetDev]
-    Name = containernet
-    Kind = ipvlan'
-    sudo bash -c 'cat << EOF > /etc/systemd/network/containernet.network
-    [Match]
-    Name = containernet
-    [Network]
-    IPForward = yes
-    Address = 192.168.1.120/24'
-    ```
-
-4. Disable `networkmanager`, the enable and start `systemd-networkd`
-
-    ```sh
-    sudo systemctl disable --now NetworkManager
-    sudo systemctl enable systemd-networkd
-    sudo systemctl start systemd-networkd
+    chown -R root:root /var/opt/home-service/apps/dns
     ```
 
 ### Container configuration
@@ -136,20 +73,7 @@ go-task --list
 ```sh
 chsh -s /usr/bin/fish
 # IMPORTANT: Log out and log back in
-go-task dotfiles
-```
-
-#### Tune selinux
-
-```sh
-sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
-sudo systemctl reboot
-```
-
-#### Disable firewalld
-
-```sh
-sudo systemctl disable --now firewalld.service
+task dotfiles
 ```
 
 ## Network topology

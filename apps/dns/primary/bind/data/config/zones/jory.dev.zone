@@ -1,7 +1,7 @@
 ; SOA Records
 $TTL 3600
-$ORIGIN jory.casa.
-@ 3600 IN SOA jory.casa. nahida.internal. (
+$ORIGIN jory.dev.
+@ 3600 IN SOA jory.dev. pompom.internal. (
     0000000001         ; serial number
     7200               ; refresh period
     3600               ; retry period
@@ -10,10 +10,13 @@ $ORIGIN jory.casa.
 )
 
 ; NS Records
-@                          IN  NS     nahida.internal.
+@                          IN  NS     pompom.internal.
 
 ; LAN
 unifi                      IN  A      192.168.1.1
+
+; Servers
+voyager                    In  A      10.69.1.100
 
 ; Containers
 bws-cache                  IN  A      192.168.1.124
@@ -21,5 +24,7 @@ traefik                    IN  A      192.168.1.125
 gatus                      IN  A      192.168.1.126
 
 ; CNAME records
-blocky                     IN  CNAME  traefik.jory.casa.
-status                     IN  CNAME  traefik.jory.casa.
+minio                      IN  CNAME  voyager.jory.dev.
+nas                        IN  CNAME  voyager.jory.dev.
+portainer                  IN  CNAME  voyager.jory.dev.
+s3                         IN  CNAME  voyager.jory.dev.
