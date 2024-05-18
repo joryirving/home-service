@@ -39,16 +39,18 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     task deps
     ```
 
-5. Create an Age public/private key pair for use with sops
+5. Add user to docker group
+
+    ```sh
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+
+6. Create an Age public/private key pair for use with sops
 
     ```sh
     age-keygen -o /var/opt/home-service/age.key
-    ```
-
-6. Change owner of dns folders
-
-    ```sh
-    chown -R root:root /var/opt/home-service/apps/dns
     ```
 
 ### Container configuration
@@ -61,7 +63,7 @@ View the [apps](./apps) directory for documentation on configuring an app contai
 Using the included [Taskfile](./Taskfile.yaml) there are helper commands to start, stop, restart containers and more. Run the command below to view all available tasks.
 
 ```sh
-go-task --list
+task --list
 ```
 
 ### Optional configuration

@@ -1,0 +1,8 @@
+services:
+  bws-cache:
+    image: ghcr.io/ripplefcl/bws-cache:latest
+    environment:
+      ORG_ID: <value>
+    ports:
+      - '5000:5000'
+

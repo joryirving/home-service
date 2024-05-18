@@ -16,9 +16,9 @@ $ORIGIN jory.casa.
 unifi                      IN  A      192.168.1.1
 
 ; Containers
-bws-cache                  IN  A      192.168.1.124
-traefik                    IN  A      192.168.1.125
-gatus                      IN  A      192.168.1.126
+bws-cache                  IN  A      192.168.1.2
+traefik                    IN  A      192.168.1.2
+gatus                      IN  A      192.168.1.2
 
 ; CNAME records
 blocky                     IN  CNAME  traefik.jory.casa.

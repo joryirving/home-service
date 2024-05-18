@@ -24,32 +24,32 @@ endpoints:
   #
   - name: blocky-external
     group: DNS
-    url: 192.168.1.122
+    url: 192.168.1.4
     dns:
       query-name: google.com
       query-type: A
     conditions: ["[DNS_RCODE] == NOERROR"]
   - name: blocky-internal
     group: DNS
-    url: 192.168.1.122
+    url: 192.168.1.4
     dns:
       query-name: pompom.internal
       query-type: A
-    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+    conditions: ["[BODY] == 192.168.1.4", "[DNS_RCODE] == NOERROR"]
   - name: bind-external
     group: DNS
-    url: 192.168.1.121
+    url: 192.168.1.4
     dns:
       query-name: google.com
       query-type: A
     conditions: ["[DNS_RCODE] == NOERROR"]
   - name: bind-internal
     group: DNS
-    url: 192.168.1.121
+    url: 192.168.1.4
     dns:
       query-name: pompom.internal
       query-type: A
-    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+    conditions: ["[BODY] == 192.168.1.4", "[DNS_RCODE] == NOERROR"]
   #
   # Devices group
   #
@@ -103,9 +103,14 @@ endpoints:
     url: icmp://10.69.1.100
     conditions: ["[CONNECTED] == true"]
     alerts: [{ type: discord }]
-  - name: RPi (ICMP)
+  - name: Network RPi (ICMP)
     group: Devices
-    url: icmp://10.69.1.101
+    url: icmp://192.168.1.4
+    conditions: ["[CONNECTED] == true"]
+    alerts: [{ type: discord }]
+  - name: Server RPi (ICMP)
+    group: Devices
+    url: icmp://192.168.1.3
     conditions: ["[CONNECTED] == true"]
     alerts: [{ type: discord }]
   - name: PiKVM (ICMP)

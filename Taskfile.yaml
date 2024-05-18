@@ -35,7 +35,7 @@ x-preconditions:
 tasks:
 
   default:
-    cmd: go-task -l
+    cmd: task -l
     silent: true
 
   deps:
@@ -56,25 +56,45 @@ tasks:
     preconditions:
       - *not-root
 
-  start-primary:
+  dns-start-primary:
     desc: Restart docker compose
+    dir: "{{.ROOT_DIR}}/apps/dns/primary/"
     cmds:
       - task: decrypt
-      - docker compose -f docker-compose-primary.yml up -d --force-recreate
-      - task: encrypt
+      - docker compose up -d --force-recreate
+      - defer: { task: encrypt }
     preconditions:
       - *not-root
     
-  start-secondary:
+  dns-start-secondary:
     desc: Restart docker compose
+    dir: "{{.ROOT_DIR}}/apps/dns/secondary/"
     cmds:
-      - docker compose -f docker-compose-secondary.yml up -d --force-recreate
+      - docker compose up -d --force-recreate
+    preconditions:
+      - *not-root
+
+  dns-stop-*: 
+    desc: Stop docker compose
+    cmd: docker compose -f ./apps/dns/{{.dns}}/docker-compose.yml down
+    vars:
+      dns: '{{index .MATCH 0}}'
+    preconditions:
+      - *not-root
+
+  start-*: 
+    desc: Start docker compose
+    dir: "{{.ROOT_DIR}}/apps/{{.container}}"
+    cmd: docker compose up -d --force-recreate
+    vars:
+      container: '{{index .MATCH 0}}'
     preconditions:
       - *not-root
 
   stop-*: 
     desc: Stop docker compose
-    cmd: docker compose -f docker-compose-{{.container}}.yml down
+    dir: "{{.ROOT_DIR}}/apps/{{.container}}"
+    cmd: docker compose down
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -93,15 +113,6 @@ tasks:
       - find ./apps/dns/primary/bind/data/config -type f -name "*.sops.key" -print0 | xargs -0 -I {} sops --encrypt --in-place {}
     preconditions:
       - *not-root
-
-  logs-*:
-    desc: Tail logs of a container
-    cmd: sudo docker logs -f {{.container}}
-    vars:
-      container: '{{index .MATCH 0}}'
-    preconditions:
-      - *not-root
-      - *container-not-found
 
   dotfiles:
     desc: Setup dotfiles

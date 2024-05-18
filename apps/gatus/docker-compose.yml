@@ -1,0 +1,10 @@
+services:
+  gatus:
+    image: ghcr.io/twin/gatus:v5.10.0
+    env_file:
+      ./data/config/config.sops.env
+    ports:
+      - '8080:80'
+    volumes:
+      - ./data/config/config.yaml:/config/config.yaml:ro
+    restart: unless-stopped

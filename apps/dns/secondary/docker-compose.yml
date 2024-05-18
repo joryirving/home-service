@@ -2,18 +2,18 @@ services:
   bind:
     image: docker.io/ubuntu/bind9:9.18-22.04_beta
     restart: unless-stopped
-    user: root
+    user: "0" # root
     environment:
       - TZ=America/Edmonton
       - BIND9_USER=root
     volumes:
-      - ./apps/dns/secondary/bind/data/cache:/var/cache/bind
-      - ./apps/dns/secondary/bind/data/config:/etc/bind:ro
+      - ./bind/data/cache:/var/cache/bind
+      - ./bind/data/config:/etc/bind:ro
     cap_add:
       - NET_BIND_SERVICE
     ports:
-      - "5301:53/tcp"
-      - "5301:53/udp"
+      - "5301:5301/tcp"
+      - "5301:5301/udp"
 
   blocky:
     image: ghcr.io/0xerr0r/blocky:v0.23
@@ -21,7 +21,7 @@ services:
     environment:
       - TZ=America/Edmonton
     volumes:
-      - ./apps/dns/secondary/blocky/data/config/config.yaml:/app/config.yml:ro
+      - ./blocky/data/config/config.yaml:/app/config.yml:ro
     cap_add:
       - NET_BIND_SERVICE
     ports:
