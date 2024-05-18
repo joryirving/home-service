@@ -2,7 +2,14 @@ services:
   bws-cache:
     image: ghcr.io/ripplefcl/bws-cache:latest
     container_name: bws-cache
+    network_mode: bridge
     env_file:
     - path: ./data/config/config.sops.env
     ports:
       - '5000:5000'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bws-cache.rule=Host(`bws-cache.jory.casa`)
+      - traefik.http.routers.bws-cache.entrypoints=web
+      - traefik.http.services.bws-cache.loadbalancer.server.port="5000"
+    restart: unless-stopped

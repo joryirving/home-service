@@ -2,7 +2,7 @@ services:
   bind:
     image: docker.io/ubuntu/bind9:9.18-22.04_beta
     container_name: bind
-    restart: unless-stopped
+    network_mode: bridge
     user: "0" # root
     environment:
       - TZ=America/Edmonton
@@ -15,11 +15,12 @@ services:
     ports:
       - "5301:5301/tcp"
       - "5301:5301/udp"
+    restart: unless-stopped
 
   blocky:
     image: ghcr.io/0xerr0r/blocky:v0.23
     container_name: blocky
-    restart: unless-stopped
+    network_mode: bridge
     environment:
       - TZ=America/Edmonton
     volumes:
@@ -29,8 +30,4 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.blocky.rule=Host'(`blocky.jory.casa`)'
-      - traefik.http.routers.blocky.entrypoints="web"
-      - traefik.http.services.blocky.loadbalancer.server.port="4000"
+    restart: unless-stopped

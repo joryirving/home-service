@@ -2,10 +2,16 @@ services:
   gatus:
     image: ghcr.io/twin/gatus:v5.10.0
     container_name: gatus
+    network_mode: bridge
     env_file:
       ./data/config/config.sops.env
     ports:
       - '8080:80'
     volumes:
       - ./data/config/config.yaml:/config/config.yaml:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gatus.rule=Host'(`status.jory.casa`)'
+      - traefik.http.routers.gatus.entrypoints=web
+      - traefik.http.services.gatus.loadbalancer.server.port="8080"
     restart: unless-stopped

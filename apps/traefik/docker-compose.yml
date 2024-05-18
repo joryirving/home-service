@@ -1,0 +1,17 @@
+services:
+  traefik:
+    image: docker.io/library/traefik:v3.0.0
+    container_name: traefik
+    network_mode: bridge
+    env_file:
+      ./data/config/config.sops.env
+    ports:
+      - '80:80'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - ./data/cache:/data
+    cap_add:
+      - NET_BIND_SERVICE
+    restart: unless-stopped
