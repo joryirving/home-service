@@ -35,7 +35,7 @@ endpoints:
     dns:
       query-name: nahida.internal
       query-type: A
-    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+    conditions: ["[BODY] == 192.168.1.5", "[DNS_RCODE] == NOERROR"]
   - name: bind-external
     group: DNS
     url: 192.168.1.121
@@ -49,7 +49,7 @@ endpoints:
     dns:
       query-name: nahida.internal
       query-type: A
-    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+    conditions: ["[BODY] == 192.168.1.5", "[DNS_RCODE] == NOERROR"]
   #
   # Devices group
   #

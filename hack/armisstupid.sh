@@ -4,3 +4,5 @@ sudo systemctl enable systemd-networkd
 sudo systemctl start systemd-networkd
 sudo systemctl disable --now firewalld.service
 go-task nut:bootstrap
+go-task restart-bind
+go-task restart-blocky
