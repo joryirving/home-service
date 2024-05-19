@@ -7,7 +7,8 @@ tasks:
   bootstrap:
     desc: Copy NUT config files
     cmds:
+      - sudo apt install nut nut-client nut-server
       - sudo rsync -rv --delete {{.ROOT_DIR}}/nut/ups/ /etc/ups/
       - sudo sed -i "s/pass_placeholder/$(cat {{.ROOT_DIR}}/nut/ups/password.secret | sed 's/\//\\\//g')/" /etc/ups/* | bash
-      - sudo systemctl enable --now nut.target nut-monitor nut-server
-      - sudo usbhid-ups -a networkups
+      # - sudo systemctl enable --now nut.target nut-monitor nut-server
+      # - sudo usbhid-ups -a networkups

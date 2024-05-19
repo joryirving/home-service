@@ -46,7 +46,7 @@ tasks:
       - sudo chmod a+r /etc/apt/keyrings/docker.asc
       - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
       - sudo apt update; sudo apt upgrade -y; sudo apt full-upgrade -y; sudo apt autoclean; sudo apt autoremove -y
-      - sudo apt install -y age bind9 dnsutils direnv expect fish fzf gh git gron htop btop moreutils nano net-tools netcat-traditional nmap rsync tcpdump telnet tree wget yq zoxide docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      - sudo apt install -y age dnsutils direnv expect fish fzf gh git gron htop btop moreutils nano net-tools netcat-traditional nmap rsync tcpdump telnet tree wget yq zoxide docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
       - wget https://github.com/getsops/sops/releases/download/{{.SOPS_VERSION}}/sops_{{.SOPS_VERSION | replace "v" ""}}_arm64.deb
       - wget https://github.com/fastfetch-cli/fastfetch/releases/download/{{.FASTFETCH_VERSION}}/fastfetch-linux-aarch64.deb
       - sudo apt install -y ./sops_{{.SOPS_VERSION | replace "v" ""}}_arm64.deb

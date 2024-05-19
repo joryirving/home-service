@@ -24,9 +24,9 @@ conditional:
     69.10.in-addr.arpa: 192.168.1.1
     internal: 192.168.1.1
     # Forward to bind
-    jory.dev: 192.168.1.4:5301
-    j8g.dev: 192.168.1.4:5301
-    jory.casa: 192.168.1.4:5301
+    jory.dev: 192.168.1.2:5301
+    j8g.dev: 192.168.1.2:5301
+    jory.casa: 192.168.1.2:5301
 
 clientLookup:
   upstream: 192.168.1.1
@@ -36,6 +36,7 @@ connectIPVersion: v4
 caching:
   minTime: 15m
   prefetching: true
+  cacheTimeNegative: -1
 
 ecs:
   useAsClient: true

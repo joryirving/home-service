@@ -21,6 +21,7 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
 
     ```sh
     sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+    sudo apt install git
     ```
 
 3. Make a new [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), add it to GitHub and clone your repo
@@ -29,13 +30,13 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     export GITHUB_USER="joryirving"
     curl https://github.com/$GITHUB_USER.keys > ~/.ssh/authorized_keys
     sudo install -d -o $(logname) -g $(logname) -m 755 ~/git/home-service
-    git clone git@github.com:$GITHUB_USER/home-service.git /~/git/home-service.
+    git clone git@github.com:$GITHUB_USER/home-service.git ~/git/home-service
     ```
 
 4. Install additional system deps and reboot
 
     ```sh
-    cd /var/opt/home-service
+    cd ~/git/home-service
     task deps
     ```
 
