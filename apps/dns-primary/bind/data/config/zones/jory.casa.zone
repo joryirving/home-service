@@ -11,14 +11,15 @@ $ORIGIN jory.casa.
 
 ; NS Records
 @                          IN  NS     pompom.internal.
+@                          IN  NS     amber.internal.
 
 ; LAN
 unifi                      IN  A      192.168.1.1
 
 ; Containers
-bws-cache                  IN  A      192.168.1.4
-traefik                    IN  A      192.168.1.4
-gatus                      IN  A      192.168.1.4
+bws-cache                  IN  A      192.168.1.2
+traefik                    IN  A      192.168.1.2
+gatus                      IN  A      192.168.1.2
 
 ; CNAME records
 blocky                     IN  CNAME  traefik.jory.casa.

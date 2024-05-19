@@ -11,3 +11,4 @@ $ORIGIN j8g.dev.
 
 ; NS Records
 @                          IN  NS     pompom.internal.
+@                          IN  NS     amber.internal.

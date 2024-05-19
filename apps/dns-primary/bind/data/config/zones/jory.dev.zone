@@ -11,6 +11,7 @@ $ORIGIN jory.dev.
 
 ; NS Records
 @                          IN  NS     pompom.internal.
+@                          IN  NS     amber.internal.
 
 ; LAN
 unifi                      IN  A      192.168.1.1
@@ -19,9 +20,9 @@ unifi                      IN  A      192.168.1.1
 voyager                    In  A      10.69.1.100
 
 ; Containers
-bws-cache                  IN  A      192.168.1.4
-traefik                    IN  A      192.168.1.4
-gatus                      IN  A      192.168.1.4
+bws-cache                  IN  A      192.168.1.2
+traefik                    IN  A      192.168.1.2
+gatus                      IN  A      192.168.1.2
 
 ; CNAME records
 minio                      IN  CNAME  voyager.jory.dev.
