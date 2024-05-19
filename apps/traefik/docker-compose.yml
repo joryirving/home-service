@@ -7,11 +7,12 @@ services:
       ./data/config/config.sops.env
     ports:
       - '80:80'
+      - '8080:8080'
+      - '443:443'
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./data/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
       - ./data/cache:/data
+      - ./data/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     cap_add:
       - NET_BIND_SERVICE
     restart: unless-stopped

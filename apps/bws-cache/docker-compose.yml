@@ -11,5 +11,5 @@ services:
       - traefik.enable=true
       - traefik.http.routers.bws-cache.rule=Host(`bws-cache.jory.casa`)
       - traefik.http.routers.bws-cache.entrypoints=web
-      - traefik.http.services.bws-cache.loadbalancer.server.port="5000"
+      - traefik.http.services.bws-cache.loadbalancer.server.port=5000
     restart: unless-stopped

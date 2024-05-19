@@ -19,11 +19,6 @@ unifi                      IN  A      192.168.1.1
 ; Servers
 voyager                    In  A      10.69.1.100
 
-; Containers
-bws-cache                  IN  A      192.168.1.2
-traefik                    IN  A      192.168.1.2
-gatus                      IN  A      192.168.1.2
-
 ; CNAME records
 minio                      IN  CNAME  voyager.jory.dev.
 nas                        IN  CNAME  voyager.jory.dev.
