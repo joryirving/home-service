@@ -1,0 +1,33 @@
+endpoints:
+  - name: Blocky (google.com)
+    group: DNS (Primary)
+    url: 192.168.1.2
+    dns:
+      query-name: google.com
+      query-type: A
+    conditions: ["[DNS_RCODE] == NOERROR"]
+    alerts: [{ type: discord }]
+  - name: Blocky (pompom.internal)
+    group: DNS (Primary)
+    url: 192.168.1.2
+    dns:
+      query-name: pompom.internal
+      query-type: A
+    conditions: ["[BODY] == 192.168.1.2", "[DNS_RCODE] == NOERROR"]
+    alerts: [{ type: discord }]
+  - name: Blocky (unifi.jory.dev)
+    group: DNS (Primary)
+    url: 192.168.1.2
+    dns:
+      query-name: unifi.jory.dev
+      query-type: A
+    conditions: ["[BODY] == 192.168.1.1", "[DNS_RCODE] == NOERROR"]
+    alerts: [{ type: discord }]
+  - name: Blocky (echo-server.jory.dev)
+    group: DNS (Primary)
+    url: 192.168.1.2
+    dns:
+      query-name: echo-server.jory.dev
+      query-type: A
+    conditions: ["[BODY] == 10.69.1.32", "[DNS_RCODE] == NOERROR"]
+    alerts: [{ type: discord }]

@@ -48,13 +48,6 @@ My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/
     newgrp docker
     ```
 
-6. Docker permissions suck. I suck at fixing them. This is my shitty hack:
-
-    ```sh
-    sudo chmod -R 777 ./apps/dns/
-    sudo chmod -R 644 ./apps/dns/*/bind/data/config/*.conf
-    ```
-
 7. Create an Age public/private key pair for use with sops
 
     ```sh

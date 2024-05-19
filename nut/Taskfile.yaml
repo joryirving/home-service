@@ -8,8 +8,12 @@ tasks:
     desc: Copy NUT config files
     cmds:
       - sudo apt install -y nut nut-client nut-server
+      - sudo chown -R $USER:$USER /etc/nut
+      - sudo chmod -R 755 /etc/nut
       - sudo rsync -rv --delete {{.ROOT_DIR}}/nut/ups/ /etc/nut/
-      - sudo sed -i "s/pass_placeholder/$(cat {{.ROOT_DIR}}/nut/ups/password.secret | sed 's/\//\\\//g')/" /etc/ups/* | bash
+      - sudo sed -i "s/pass_placeholder/$(cat {{.ROOT_DIR}}/nut/ups/password.secret | sudo sed 's/\//\\\//g')/" /etc/nut/* | bash
+      - sudo chown -R root:nut /etc/nut
+      - sudo chmod -R 750 /etc/nut
       - sudo service nut-server restart
       - sudo service nut-client restart
       - sudo systemctl restart nut-monitor

@@ -5,10 +5,12 @@ services:
     network_mode: bridge
     env_file:
       ./data/config/config.sops.env
+    environment:
+      - GATUS_CONFIG_PATH=/config
     ports:
       - '8080:80'
     volumes:
-      - ./data/config/config.yaml:/config/config.yaml:ro
+      - ./data/config:/config:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.gatus.rule=Host'(`status.jory.casa`)'
