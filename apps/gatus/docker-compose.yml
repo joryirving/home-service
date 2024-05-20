@@ -1,0 +1,24 @@
+services:
+  gatus:
+    image: ghcr.io/twin/gatus:v5.10.0
+    container_name: gatus
+    network_mode: bridge
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      ./data/config/config.sops.env
+    environment:
+      - TZ=American/Edmonton
+      - GATUS_CONFIG_PATH=/config
+    ports:
+      - '8000:80'
+    volumes:
+      - ./data/config:/config:ro
+    cap_add:
+      - NET_BIND_SERVICE
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gatus.rule=Host(`status.jory.casa`)
+      - traefik.http.routers.gatus.entrypoints=web
+      - traefik.http.services.gatus.loadbalancer.server.port=80
+    restart: unless-stopped

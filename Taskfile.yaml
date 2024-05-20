@@ -8,6 +8,8 @@ env:
 vars:
   # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
+  # renovate: datasource=github-releases depName=fastfetch-cli/fastfetch
+  FASTFETCH_VERSION: 2.12.0
 
 includes:
   app: ./apps
@@ -19,13 +21,13 @@ x-preconditions:
     sh: '[[ $LOGNAME != "root" ]]'
   - &container-service-not-found
     msg: container service '{{.container}}' not found
-    sh: systemctl status {{.container}}
+    sh: test -f /var/opt/{{.container}}/docker-compose.yml
   - &container-not-found
     msg: container '{{.container}}' not found
-    sh: sudo podman inspect {{.container}}
+    sh: docker inspect {{.container}}
   - &container-file-not-found
-    msg: file 'apps/{{.container}}/{{.container}}.container' not found
-    sh: test -f {{.ROOT_DIR}}/apps/{{.container}}/{{.container}}.container
+    msg: file 'apps/{{.container}}/docker-compose.yml' not found
+    sh: test -f {{.ROOT_DIR}}/apps/{{.container}}/docker-compose.yml
   - &container-directory-not-found
     msg: directory 'apps/{{.container}}/data' not found
     sh: test -d {{.ROOT_DIR}}/apps/{{.container}}/data
@@ -33,25 +35,34 @@ x-preconditions:
 tasks:
 
   default:
-    cmd: go-task -l
+    cmd: task -l
     silent: true
 
   deps:
     desc: Install System Deps
     cmds:
-      - sudo rpm-ostree install --idempotent --assumeyes age bind-utils direnv expect fastfetch fish fzf gh git go-task gron htop moreutils nano net-tools netcat nmap rsync systemd-networkd tcpdump telnet tree wget yq zoxide
-      - sudo rpm-ostree install --idempotent --assumeyes https://github.com/getsops/sops/releases/download/{{.SOPS_VERSION}}/sops-{{.SOPS_VERSION | replace "v" ""}}.aarch64.rpm
+      - sudo install -m 0755 -d /etc/apt/keyrings
+      - sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+      - sudo chmod a+r /etc/apt/keyrings/docker.asc
+      - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      - sudo apt update; sudo apt upgrade -y; sudo apt full-upgrade -y; sudo apt autoclean; sudo apt autoremove -y
+      - sudo apt install -y age dnsutils direnv expect fish fzf gh git gron htop btop moreutils nano net-tools netcat-traditional nmap rsync tcpdump telnet tree wget yq zoxide docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      - wget https://github.com/getsops/sops/releases/download/{{.SOPS_VERSION}}/sops_{{.SOPS_VERSION | replace "v" ""}}_arm64.deb
+      - wget https://github.com/fastfetch-cli/fastfetch/releases/download/{{.FASTFETCH_VERSION}}/fastfetch-linux-aarch64.deb
+      - sudo apt install -y ./sops_{{.SOPS_VERSION | replace "v" ""}}_arm64.deb
+      - sudo apt install -y ./fastfetch-linux-aarch64.deb
+      - sudo rm sops_{{.SOPS_VERSION | replace "v" ""}}_arm64.deb
+      - sudo rm fastfetch-linux-aarch64.deb
+      - sudo install -d -o $(logname) -g $(logname) -m 755 /var/opt
     preconditions:
       - *not-root
-
 
   start-*:
     desc: Start a container service
     cmds:
       - task: reload-{{.container}}
-      - sudo systemctl start {{.container}}
-      - sudo systemctl is-active --quiet {{.container}} || exit 1
-      - sudo podman ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
+      - docker compose -f /var/opt/{{.container}}/docker-compose.yml up -d
+      - sudo docker ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -59,7 +70,7 @@ tasks:
 
   stop-*:
     desc: Stop a container service
-    cmd: sudo systemctl stop {{.container}}
+    cmd: docker compose -f /var/opt/{{.container}}/docker-compose.yml down
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -70,9 +81,8 @@ tasks:
     desc: Restart a container service
     cmds:
       - task: reload-{{.container}}
-      - sudo systemctl restart {{.container}}
-      - sudo systemctl is-active --quiet {{.container}} || exit 1
-      - sudo podman ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
+      - docker compose -f /var/opt/{{.container}}/docker-compose.yml restart
+      - sudo docker ps --all --filter name={{.container}} --format "{{ `{{.Names}} - {{.Image}} - {{.Status}}` }}"
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -81,7 +91,7 @@ tasks:
 
   status-*:
     desc: Status of a container service
-    cmd: sudo systemctl status {{.container}}
+    cmd: docker compose -f /var/opt/{{.container}}/docker-compose.yml ps
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -91,17 +101,16 @@ tasks:
   reload-*:
     desc: Reload a container service
     cmds:
-      - sudo rsync -rv {{.ROOT_DIR}}/apps/{{.container}}/{{.container}}.container /etc/containers/systemd/
-      - sudo rsync -rv --mkpath --delete {{.ROOT_DIR}}/apps/{{.container}}/data/{{- if eq .CLI_FORCE false }}config/{{ end }} /etc/containers/systemd/{{.container}}{{- if eq .CLI_FORCE false }}/config{{ end }}
-      - sudo --preserve-env bash -c "find /etc/containers/systemd/{{.container}}/config -type f -name "*.sops.*" -print0 | xargs -0 -I {} sops --config {{.ROOT_DIR}}/.sops.yaml --decrypt --in-place {}"
-      - sudo systemctl daemon-reload
+      # - sudo rsync -rv {{.ROOT_DIR}}/apps/{{.container}}/docker-compose.yml /var/opt/{{.container}}/
+      # - sudo rsync -rv --mkpath --delete {{.ROOT_DIR}}/apps/{{.container}}/data/{{- if eq .CLI_FORCE false }}config/{{ end }} /var/opt/{{.container}}{{- if eq .CLI_FORCE false }}/config{{ end }}
+      - sudo rsync -rv {{.ROOT_DIR}}/apps/{{.container}}/ /var/opt/{{.container}}/
+      - sudo --preserve-env bash -c "find /var/opt/{{.container}} -type f -name "*.sops.*" -print0 | xargs -0 -I {} sops --config {{.ROOT_DIR}}/.sops.yaml --decrypt --in-place {}"
     sources:
-      - '{{.ROOT_DIR}}/apps/{{.container}}/{{.container}}.container'
+      - '{{.ROOT_DIR}}/apps/{{.container}}/docker-compose.yml'
       - '{{.ROOT_DIR}}/apps/{{.container}}/data/config/**/**'
     generates:
-      - /etc/containers/systemd/{{.container}}.container
-      - /etc/containers/systemd/{{.container}}/config/**/**
-      - /run/systemd/generator/{{.container}}.service
+      - /var/opt/{{.container}}/docker-compose.yml
+      - /var/opt/{{.container}}/config/**/**
     label: reload-{{.container}}
     preconditions:
       - *not-root
@@ -115,10 +124,7 @@ tasks:
     prompt: Remove the '{{.container}}' container ... continue?
     cmds:
       - task: stop-{{.container}}
-      - sudo rm /etc/containers/systemd/{{.container}}.container
-      - sudo rm -rf /etc/containers/systemd/{{.container}}
-      - sudo rm -rf /run/systemd/generator/{{.container}}.service
-      - sudo systemctl daemon-reload
+      - sudo rm -rf /var/opt/{{.container}}
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -126,7 +132,7 @@ tasks:
 
   logs-*:
     desc: Tail logs of a container
-    cmd: sudo podman logs -f {{.container}}
+    cmd: sudo docker logs -f {{.container}}
     vars:
       container: '{{index .MATCH 0}}'
     preconditions:
@@ -142,7 +148,7 @@ tasks:
         mkdir -p /home/$LOGNAME/.config/direnv && \
         tee /home/$LOGNAME/.config/direnv/direnv.toml > /dev/null <<EOF
         [whitelist]
-        prefix = [ "/var/opt/home-service" ]
+        prefix = [ "~/git/home-service" ]
         EOF
       - | # Fish Hooks
         tee /home/$LOGNAME/.config/fish/conf.d/hooks.fish > /dev/null <<EOF
@@ -157,10 +163,6 @@ tasks:
                 zoxide init fish | source
             end
         end
-        EOF
-      - | # Fish Aliases
-        tee /home/$LOGNAME/.config/fish/conf.d/aliases.fish > /dev/null <<EOF
-        alias task go-task
         EOF
       - | # Fish Greeting
         tee /home/$LOGNAME/.config/fish/conf.d/fish_greeting.fish > /dev/null <<EOF

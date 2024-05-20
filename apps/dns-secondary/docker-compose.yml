@@ -1,0 +1,33 @@
+services:
+  bind:
+    image: docker.io/ubuntu/bind9:9.18-22.04_beta
+    container_name: bind
+    network_mode: bridge
+    user: "0" # root
+    environment:
+      - TZ=America/Edmonton
+      - BIND9_USER=root
+    volumes:
+      - ./bind/data/cache:/var/cache/bind
+      - ./bind/data/config:/etc/bind:ro
+    cap_add:
+      - NET_BIND_SERVICE
+    ports:
+      - "5301:5301/tcp"
+      - "5301:5301/udp"
+    restart: unless-stopped
+
+  blocky:
+    image: ghcr.io/0xerr0r/blocky:v0.23
+    container_name: blocky
+    network_mode: bridge
+    environment:
+      - TZ=America/Edmonton
+    volumes:
+      - ./blocky/data/config/config.yaml:/app/config.yml:ro
+    cap_add:
+      - NET_BIND_SERVICE
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    restart: unless-stopped

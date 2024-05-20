@@ -17,11 +17,7 @@
 
 2. [Optional] Create additional rndc keys for external-dns and encrypt them with sops
 
-3. Update `./apps/bind/data/config` with your configuration and then start it
-
-    ```sh
-    task start-bind
-    ```
+3. Update `./apps/bind/data/config` with your configuration
 
 ## Optional configuration
 
@@ -40,10 +36,10 @@
 
 > [!IMPORTANT]
 > _Blocky can take awhile to start depending on how many blocklists you have configured_
-1. Update `./apps/blocky/data/config/config.yaml` with your configuration and then start it
+1. Update `./apps/blocky/data/config/config.yaml` with your configuration and then start the stack
 
     ```sh
-    task start-blocky
+    task dns-start-primary
     ```
 
 ## bws-cache
@@ -52,15 +48,9 @@
 
 ## Configuration
 
-1. Add your `ORG_ID` to `./apps/bws-cache/bws-cache.secret`
-1
-2. Create the podman secret
+1. Add your `ORG_ID` to `./apps/bws-cache/data/config/config.sops.env`
 
-    ```sh
-    sudo podman secret create org_id ./apps/bws-cache/bws-cache.secret
-    ```
-
-3. Start `bws-cache`
+2. Start `bws-cache`
     ```sh
     task start-bws-cache
     ```

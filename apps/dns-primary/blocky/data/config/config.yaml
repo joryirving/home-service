@@ -1,0 +1,70 @@
+---
+ports:
+  dns: 0.0.0.0:53
+  http: 0.0.0.0:4000
+
+bootstrapDns:
+  - https://1.1.1.1/dns-query
+  - https://1.0.0.1/dns-query
+
+upstreams:
+  groups:
+    default:
+      - https://1.1.1.1/dns-query
+      - https://1.0.0.1/dns-query
+    kenna*:
+      - https://1.1.1.3/dns-query
+      - https://1.0.0.3/dns-query
+
+conditional:
+  fallbackUpstream: false
+  mapping:
+    # Forward to router
+    168.192.in-addr.arpa: 192.168.1.1
+    69.10.in-addr.arpa: 192.168.1.1
+    internal: 192.168.1.1
+    # Forward to bind
+    jory.dev: 192.168.1.2:5301
+    j8g.dev: 192.168.1.2:5301
+    jory.casa: 192.168.1.2:5301
+
+clientLookup:
+  upstream: 192.168.1.1
+
+connectIPVersion: v4
+
+caching:
+  minTime: 15m
+  prefetching: true
+  cacheTimeNegative: -1
+
+ecs:
+  useAsClient: true
+
+prometheus:
+  enable: true
+  path: /metrics
+
+blocking:
+  loading:
+    downloads:
+      timeout: 60s
+  blackLists:
+    ads:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+      - |
+        *.androidtvchannels-pa.googleapis.com
+        *.androidtvwatsonfe-pa.googleapis.com
+    fakenews:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts
+    gambling:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-only/hosts
+  whiteLists:
+    ads:
+      - |
+        *.amazonaws.com
+  clientGroupsBlock:
+    default:
+      - ads
+      - fakenews
+      - gambling
