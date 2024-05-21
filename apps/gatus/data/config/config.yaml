@@ -4,8 +4,9 @@ storage:
   type: memory
 metrics: true
 ui:
-  title: Status | Gatus
-  header: Status
+  title: Health Status
+  header: Health Status
+  logo: https://raw.githubusercontent.com/joryirving/home-ops/main/.docs/icons/lds-transparent.png
 alerting:
   discord:
     webhook-url: ${DISCORD_WEBHOOK_URL}
