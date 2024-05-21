@@ -1,11 +1,10 @@
 # home-service
 
-My home service stack running on a [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) with [Fedora IoT](https://fedoraproject.org/iot/). Applications are run as [podman](https://github.com/containers/podman) containers and managed by systemd to support my home infrastructure.
+My home service stack running on a [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5//) with [Raspberry Pi OS](https://www.raspberrypi.com/software/). Applications are run as [docker](https://www.docker.com/) containers and managed by docker compose to support my home infrastructure.
 
 ## Core components
 
 - [direnv](https://github.com/direnv/direnv): Update environment per working directory.
-- [podman](https://github.com/containers/podman): A tool for managing OCI containers and pods with native [systemd](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) integration.
 - [renovate](https://github.com/renovatebot/renovate): Universal dependency automation tool.
 - [sops](https://github.com/getsops/sops): Manage secrets which are commited to Git using [Age](https://github.com/FiloSottile/age) for encryption.
 - [task](https://github.com/go-task/task): A task runner / simpler Make alternative written in Go.
