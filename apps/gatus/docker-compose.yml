@@ -1,6 +1,6 @@
 services:
   gatus:
-    image: ghcr.io/twin/gatus:v5.10.0
+    image: ghcr.io/twin/gatus:v5.11.0
     container_name: gatus
     network_mode: bridge
     extra_hosts:
