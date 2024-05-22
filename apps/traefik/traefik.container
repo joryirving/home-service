@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Container]
 ContainerName=traefik
-Image=docker.io/library/traefik:v3.0.0
+Image=docker.io/library/traefik:v3.0.1
 EnvironmentFile=./traefik/config/config.sops.env
 Volume=./traefik/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
 Volume=./traefik/cache:/data
