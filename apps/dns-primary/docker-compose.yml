@@ -1,6 +1,6 @@
 services:
   bind:
-    image: docker.io/ubuntu/bind9:9.18-22.04_beta
+    image: docker.io/ubuntu/bind9:9.18-22.04_beta@sha256:1dc6d428e149fcba4a43894e15f229c65c34180ab7c7010e94667ea46877f5ea
     container_name: bind
     user: "0" # root
     network_mode: bridge
@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   blocky:
-    image: ghcr.io/0xerr0r/blocky:v0.23
+    image: ghcr.io/0xerr0r/blocky:v0.23@sha256:450d193393c0dceb108d1cd80a5580ab9d851127c924c1ae89361d32161ae528
     container_name: blocky
     network_mode: bridge
     environment:

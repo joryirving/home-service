@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.0.1
+    image: docker.io/library/traefik:v3.0.1@sha256:7ca3233c2d4d862db071aceba4355bb430065ec00d818b6b4724c09f2a6a2783
     container_name: traefik
     network_mode: bridge
     env_file:
