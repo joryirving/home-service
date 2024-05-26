@@ -43,16 +43,16 @@ customDNS:
     nas        IN CNAME  voyager.jory.dev.
     portainer  IN CNAME  voyager.jory.dev.
     s3         IN CNAME  voyager.jory.dev.
-  # zone: |
-  #   $TTL 3600
-  #   $ORIGIN jory.casa.
-  #   ; Containers
-  #   traefik    IN A      192.168.1.2
-  #   gatus      IN A      192.168.1.2
-  #   ; CNAME records
-  #   blocky     IN CNAME  traefik.jory.casa.
-  #   bws-cache  IN CNAME  traefik.jory.casa.
-  #   status     IN CNAME  traefik.jory.casa.
+    
+    $TTL 3600
+    $ORIGIN jory.casa.
+    ; Containers
+    traefik    IN A      192.168.1.2
+    gatus      IN A      192.168.1.2
+    ; CNAME records
+    blocky     IN CNAME  traefik.jory.casa.
+    bws-cache  IN CNAME  traefik.jory.casa.
+    status     IN CNAME  traefik.jory.casa.
 
 connectIPVersion: v4
 
