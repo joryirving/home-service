@@ -9,7 +9,7 @@ vars:
   # renovate: datasource=github-releases depName=getsops/sops
   SOPS_VERSION: v3.8.1
   # renovate: datasource=github-releases depName=fastfetch-cli/fastfetch
-  FASTFETCH_VERSION: 2.13.2
+  FASTFETCH_VERSION: 2.14.0
 
 includes:
   app: ./apps
